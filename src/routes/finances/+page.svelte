@@ -79,7 +79,7 @@
 		{#each data.transactions as tx}
 			<div class="flex items-center justify-between py-2 border-b border-border-soft">
 				<div class="flex flex-col">
-					<span class="text-[13px]">{tx.description || tx.categoryName || 'sin categoria'}</span>
+					<span class="text-[13px]">{tx.description || tx.categoryName || 'sin categoría'}</span>
 					<span class="text-[10px] text-t3">{tx.date}</span>
 				</div>
 				<button onclick={() => remove(tx.id)} class="flex items-center gap-1">
@@ -97,7 +97,7 @@
 		<!-- svelte-ignore a11y_no_static_element_interactions -->
 		<div class="bg-surface border-t border-border rounded-t-2xl w-full max-w-md p-4 space-y-3" onkeydown={() => {}}>
 			<div class="flex justify-between items-center">
-				<span class="text-[13px] font-medium">nueva transaccion</span>
+				<span class="text-[13px] font-medium">nueva transacción</span>
 				<button onclick={() => showForm = false} class="text-t2 text-sm">cerrar</button>
 			</div>
 
@@ -128,7 +128,7 @@
 			<input
 				type="text"
 				bind:value={formDesc}
-				placeholder="descripcion (opcional)"
+				placeholder="descripción (opcional)"
 				class="w-full bg-elevated border border-border rounded-lg px-3 py-2.5 text-[13px] text-t1 placeholder:text-t3 outline-none focus:border-accent-dim"
 			/>
 

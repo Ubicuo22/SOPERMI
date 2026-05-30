@@ -180,7 +180,7 @@ export function getDailyCockpit(date: string) {
 	const checklist = [
 		{
 			id: 'sleep',
-			label: 'registrar sueno',
+			label: 'registrar sueño',
 			done: sleepDone,
 			detail: sleep ? `${sleep.hours}h (${sleep.sleptAt} → ${sleep.wokeAt})` : null
 		},
@@ -204,7 +204,7 @@ export function getDailyCockpit(date: string) {
 		},
 		{
 			id: 'protein',
-			label: `proteina (${protein}/${profile.proteinTarget}g)`,
+			label: `proteína (${protein}/${profile.proteinTarget}g)`,
 			done: protein >= profile.proteinTarget,
 			detail: `${calories} kcal`
 		}

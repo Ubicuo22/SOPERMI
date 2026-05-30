@@ -26,7 +26,7 @@
 	</div>
 
 	<div class="grid grid-cols-3 gap-2">
-		<MetricCard label="proteina" value="{data.macros.protein}g" accent />
+		<MetricCard label="proteína" value="{data.macros.protein}g" accent />
 		<MetricCard label="carbs" value="{data.macros.carbs}g" />
 		<MetricCard label="grasa" value="{data.macros.fat}g" />
 	</div>

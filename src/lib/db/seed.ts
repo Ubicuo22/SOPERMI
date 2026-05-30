@@ -141,7 +141,7 @@ export function seed() {
 	db.insert(schema.habits).values([
 		{ id: 1, name: 'agua 2L', frequency: 'daily', color: '#b8f240', icon: 'ti-droplet' },
 		{ id: 2, name: 'leer 30min', frequency: 'daily', color: '#b8f240', icon: 'ti-book' },
-		{ id: 3, name: 'no azucar', frequency: 'daily', color: '#f0a500', icon: 'ti-x' },
+		{ id: 3, name: 'no azúcar', frequency: 'daily', color: '#f0a500', icon: 'ti-x' },
 		{ id: 4, name: 'dormir 23:00', frequency: 'daily', color: '#888888', icon: 'ti-moon' },
 		{ id: 5, name: 'meditar', frequency: 'daily', color: '#7aab1a', icon: 'ti-brain' },
 		{ id: 6, name: 'caminar 30min', frequency: 'daily', color: '#b8f240', icon: 'ti-walk' },

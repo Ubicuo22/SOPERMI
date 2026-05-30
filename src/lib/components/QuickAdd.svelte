@@ -4,11 +4,11 @@
 	let open = $state(false);
 
 	const options = [
-		{ label: 'transaccion', icon: IconChartBar, href: '/finances?add=1' },
+		{ label: 'transacción', icon: IconChartBar, href: '/finances?add=1' },
 		{ label: 'tarea', icon: IconClock, href: '/time?add=1' },
 		{ label: 'set', icon: IconBarbell, href: '/gym?add=1' },
 		{ label: 'comida', icon: IconSalad, href: '/meals?add=1' },
-		{ label: 'habito', icon: IconCheck, href: '/habits?add=1' }
+		{ label: 'hábito', icon: IconCheck, href: '/habits?add=1' }
 	];
 </script>
 

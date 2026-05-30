@@ -222,7 +222,7 @@
 
 		<!-- Checklist del día -->
 		<div class="space-y-1">
-			<span class="text-[11px] text-t2 uppercase tracking-[0.08em]">checklist del dia</span>
+			<span class="text-[11px] text-t2 uppercase tracking-[0.08em]">checklist del día</span>
 			{#each data.cockpit.checklist as item}
 				{@const isHabit = item.id.startsWith('habit-')}
 				<button
@@ -262,7 +262,7 @@
 		<!-- Métricas rápidas -->
 		<div class="grid grid-cols-3 gap-2">
 			<MetricCard label="foco" value="{data.cockpit.focusMinutes}m" accent={data.cockpit.focusMinutes > 0} />
-			<MetricCard label="proteina" value="{data.cockpit.protein}g" accent={data.cockpit.protein >= data.profile.proteinTarget} />
+			<MetricCard label="proteína" value="{data.cockpit.protein}g" accent={data.cockpit.protein >= data.profile.proteinTarget} />
 			<MetricCard label="calorias" value="{data.cockpit.calories}" />
 		</div>
 
@@ -309,11 +309,11 @@
 		<div class="space-y-2">
 			<span class="text-[11px] text-t2 uppercase tracking-[0.08em]">breakdown de hoy</span>
 			{#each [
-				{ label: 'sueno', value: data.score?.sleepScore ?? 0, weight: '20%' },
-				{ label: 'habitos', value: data.score?.habitsScore ?? 0, weight: '25%' },
+				{ label: 'sueño', value: data.score?.sleepScore ?? 0, weight: '20%' },
+				{ label: 'hábitos', value: data.score?.habitsScore ?? 0, weight: '25%' },
 				{ label: 'foco', value: data.score?.focusScore ?? 0, weight: '25%' },
 				{ label: 'gym', value: data.score?.gymScore ?? 0, weight: '15%' },
-				{ label: 'nutricion', value: data.score?.nutritionScore ?? 0, weight: '15%' }
+				{ label: 'nutrición', value: data.score?.nutritionScore ?? 0, weight: '15%' }
 			] as item}
 				<div class="flex items-center gap-2">
 					<span class="text-[11px] text-t2 w-16">{item.label}</span>
@@ -328,14 +328,14 @@
 
 		<!-- Sleep log -->
 		<div class="bg-surface border border-border rounded-[14px] p-3.5 space-y-2">
-			<span class="text-[11px] text-t2 uppercase tracking-[0.08em]">registro de sueno</span>
+			<span class="text-[11px] text-t2 uppercase tracking-[0.08em]">registro de sueño</span>
 			<div class="grid grid-cols-2 gap-2">
 				<div>
-					<label class="text-[10px] text-t3 block mb-1">me dormi</label>
+					<label class="text-[10px] text-t3 block mb-1">me dormí</label>
 					<input type="time" bind:value={sleepSleptAt} class="w-full bg-elevated border border-border rounded-lg px-2 py-2 font-mono text-sm text-t1 outline-none focus:border-accent-dim" />
 				</div>
 				<div>
-					<label class="text-[10px] text-t3 block mb-1">desperte</label>
+					<label class="text-[10px] text-t3 block mb-1">desperté</label>
 					<input type="time" bind:value={sleepWokeAt} class="w-full bg-elevated border border-border rounded-lg px-2 py-2 font-mono text-sm text-t1 outline-none focus:border-accent-dim" />
 				</div>
 			</div>
@@ -351,13 +351,13 @@
 					{/each}
 				</div>
 			</div>
-			<button onclick={logSleep} class="w-full bg-accent text-bg font-medium text-xs py-2.5 rounded-lg active:scale-[0.98] transition-transform">guardar sueno</button>
+			<button onclick={logSleep} class="w-full bg-accent text-bg font-medium text-xs py-2.5 rounded-lg active:scale-[0.98] transition-transform">guardar sueño</button>
 		</div>
 
 		<!-- Score history -->
 		{#if data.scoreHistory.length > 0}
 			<div class="space-y-2">
-				<span class="text-[11px] text-t2 uppercase tracking-[0.08em]">ultimos 14 dias</span>
+				<span class="text-[11px] text-t2 uppercase tracking-[0.08em]">últimos 14 días</span>
 				<div class="flex items-end gap-[3px] h-16">
 					{#each data.scoreHistory.slice().reverse() as day}
 						<div class="flex-1 flex flex-col items-center gap-0.5">
@@ -409,7 +409,7 @@
 
 		{#if showGoalForm}
 			<div class="bg-surface border border-border rounded-[14px] p-3.5 space-y-2">
-				<input type="text" bind:value={goalTitle} placeholder="titulo de la meta" class="w-full bg-elevated border border-border rounded-lg px-3 py-2 text-[13px] text-t1 placeholder:text-t3 outline-none" />
+				<input type="text" bind:value={goalTitle} placeholder="título de la meta" class="w-full bg-elevated border border-border rounded-lg px-3 py-2 text-[13px] text-t1 placeholder:text-t3 outline-none" />
 				<div class="grid grid-cols-2 gap-2">
 					<select bind:value={goalCategory} class="bg-elevated border border-border rounded-lg px-2 py-2 text-[11px] text-t1 outline-none">
 						<option value="body">body</option>
@@ -468,7 +468,7 @@
 			<input type="text" bind:value={configName} placeholder="tu nombre" class="w-full bg-elevated border border-border rounded-lg px-3 py-2.5 text-[13px] text-t1 placeholder:text-t3 outline-none" />
 			<input type="text" bind:value={configIdentity} placeholder="soy alguien que..." class="w-full bg-elevated border border-border rounded-lg px-3 py-2.5 text-[13px] text-t1 placeholder:text-t3 outline-none italic" />
 
-			<span class="text-[11px] text-t2 uppercase tracking-[0.08em] block pt-2">arquitectura de sueno</span>
+			<span class="text-[11px] text-t2 uppercase tracking-[0.08em] block pt-2">arquitectura de sueño</span>
 			<div class="grid grid-cols-2 gap-2">
 				<div>
 					<label class="text-[10px] text-t3 block mb-1">dormir a las</label>
@@ -497,7 +497,7 @@
 					<input type="number" bind:value={configCalories} class="w-full bg-elevated border border-border rounded-lg px-2 py-2 font-mono text-sm text-t1 outline-none" />
 				</div>
 				<div>
-					<label class="text-[10px] text-t3 block mb-1">proteina (g)</label>
+					<label class="text-[10px] text-t3 block mb-1">proteína (g)</label>
 					<input type="number" bind:value={configProtein} class="w-full bg-elevated border border-border rounded-lg px-2 py-2 font-mono text-sm text-t1 outline-none" />
 				</div>
 			</div>

@@ -117,7 +117,7 @@
 			<input
 				type="text"
 				bind:value={formTitle}
-				placeholder="titulo de la tarea"
+				placeholder="título de la tarea"
 				class="w-full bg-elevated border border-border rounded-lg px-3 py-2.5 text-[13px] text-t1 placeholder:text-t3 outline-none focus:border-accent-dim"
 			/>
 			<select bind:value={formPriority} class="w-full bg-elevated border border-border rounded-lg px-3 py-2.5 text-[13px] text-t1 outline-none">

@@ -30,11 +30,11 @@
 	const days28 = getLast28Days();
 </script>
 
-<TopBar title="habitos" />
+<TopBar title="hábitos" />
 
 <div class="px-4 pb-4 space-y-4">
 	{#if data.habits.length === 0}
-		<p class="text-t2 text-xs py-8 text-center">sin habitos — agrega uno con +</p>
+		<p class="text-t2 text-xs py-8 text-center">sin hábitos — agrega uno con +</p>
 	{/if}
 
 	{#each data.habits as habit}

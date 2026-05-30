@@ -8,7 +8,7 @@
 		{ href: '/time', icon: IconClock, label: 'tiempo' },
 		{ href: '/gym', icon: IconBarbell, label: 'gym' },
 		{ href: '/meals', icon: IconSalad, label: 'comidas' },
-		{ href: '/habits', icon: IconCheck, label: 'habitos' }
+		{ href: '/habits', icon: IconCheck, label: 'hábitos' }
 	];
 </script>
 
