@@ -125,29 +125,131 @@ export function getRecentSleep(days = 7) {
 	return db.select().from(schema.sleepLogs).orderBy(desc(schema.sleepLogs.date)).limit(days).all();
 }
 
+// ─── DAILY COCKPIT — the real magic ───
+
+export function getDailyCockpit(date: string) {
+	const profile = getProfile();
+
+	// Sleep
+	const sleep = getSleepLog(date);
+	const sleepDone = !!sleep?.sleptAt;
+
+	// Habits
+	const allHabits = db.select().from(schema.habits).where(eq(schema.habits.active, 1)).all();
+	const completedHabits = db.select().from(schema.habitLogs).where(and(
+		eq(schema.habitLogs.date, date),
+		eq(schema.habitLogs.completed, 1)
+	)).all();
+	const completedHabitIds = new Set(completedHabits.map(l => l.habitId));
+
+	// Focus
+	const focusResult = db.select({
+		totalMin: sql<number>`COALESCE(SUM((julianday(end_at) - julianday(start_at)) * 1440), 0)`
+	}).from(schema.timeBlocks).where(and(
+		like(schema.timeBlocks.startAt, `${date}%`),
+		eq(schema.timeBlocks.type, 'focus'),
+		sql`${schema.timeBlocks.endAt} IS NOT NULL`
+	)).get();
+	const focusMinutes = Math.round(focusResult?.totalMin ?? 0);
+	const focusTarget = profile.focusHoursTarget * 60;
+
+	// Gym
+	const workout = db.select().from(schema.workouts).where(eq(schema.workouts.date, date)).get();
+	const workoutDone = !!workout;
+
+	// Nutrition
+	const nutritionResult = db.select({
+		protein: sql<number>`COALESCE(SUM(${schema.mealFoods.grams} / 100.0 * ${schema.foods.proteinPer100g}), 0)`,
+		calories: sql<number>`COALESCE(SUM(${schema.mealFoods.grams} / 100.0 * ${schema.foods.caloriesPer100g}), 0)`
+	}).from(schema.meals)
+		.innerJoin(schema.mealFoods, eq(schema.meals.id, schema.mealFoods.mealId))
+		.innerJoin(schema.foods, eq(schema.mealFoods.foodId, schema.foods.id))
+		.where(eq(schema.meals.date, date))
+		.get();
+	const protein = Math.round(nutritionResult?.protein ?? 0);
+	const calories = Math.round(nutritionResult?.calories ?? 0);
+
+	// Pending tasks
+	const pendingTasks = db.select().from(schema.tasks)
+		.where(eq(schema.tasks.status, 'pending'))
+		.orderBy(schema.tasks.priority)
+		.limit(5)
+		.all();
+
+	// Build checklist items
+	const checklist = [
+		{
+			id: 'sleep',
+			label: 'registrar sueno',
+			done: sleepDone,
+			detail: sleep ? `${sleep.hours}h (${sleep.sleptAt} → ${sleep.wokeAt})` : null
+		},
+		...allHabits.map(h => ({
+			id: `habit-${h.id}`,
+			label: h.name,
+			done: completedHabitIds.has(h.id),
+			detail: null
+		})),
+		{
+			id: 'focus',
+			label: `foco (${focusMinutes}/${focusTarget} min)`,
+			done: focusMinutes >= focusTarget,
+			detail: focusMinutes > 0 ? `${Math.round(focusMinutes / 25)} pomodoros` : null
+		},
+		{
+			id: 'gym',
+			label: 'entrenar',
+			done: workoutDone,
+			detail: workout ? `workout activo` : null
+		},
+		{
+			id: 'protein',
+			label: `proteina (${protein}/${profile.proteinTarget}g)`,
+			done: protein >= profile.proteinTarget,
+			detail: `${calories} kcal`
+		}
+	];
+
+	const totalItems = checklist.length;
+	const doneItems = checklist.filter(c => c.done).length;
+	const completionPct = Math.round((doneItems / totalItems) * 100);
+
+	return {
+		checklist,
+		completionPct,
+		doneItems,
+		totalItems,
+		pendingTasks,
+		focusMinutes,
+		protein,
+		calories
+	};
+}
+
 // ─── DAILY SCORE ───
 
 export function calculateDailyScore(date: string) {
 	const profile = getProfile();
 
-	// 1. Sleep score (0-100): basado en si durmió a la hora target ± 30min
+	// 1. Sleep score
 	const sleep = getSleepLog(date);
 	let sleepScore = 0;
 	if (sleep?.sleptAt) {
 		const [targetH, targetM] = profile.sleepTarget.split(':').map(Number);
 		const [actualH, actualM] = sleep.sleptAt.split(':').map(Number);
-		const targetMin = targetH * 60 + targetM;
+		let targetMin = targetH * 60 + targetM;
 		let actualMin = actualH * 60 + actualM;
-		if (actualMin < 12 * 60) actualMin += 24 * 60; // después de medianoche
-		if (targetMin < 12 * 60) {} // target después de medianoche — no ajustar
-		const diff = Math.abs(actualMin - (targetMin < 12 * 60 ? targetMin + 24 * 60 : targetMin));
+		// Normalize for late-night times (after midnight)
+		if (targetMin >= 12 * 60) targetMin -= 24 * 60;
+		if (actualMin >= 12 * 60) actualMin -= 24 * 60;
+		const diff = Math.abs(actualMin - targetMin);
 		if (diff <= 15) sleepScore = 100;
 		else if (diff <= 30) sleepScore = 80;
 		else if (diff <= 60) sleepScore = 50;
 		else sleepScore = 20;
 	}
 
-	// 2. Habits score: % completados hoy
+	// 2. Habits score
 	const habits = db.select().from(schema.habits).where(eq(schema.habits.active, 1)).all();
 	const habitLogs = db.select().from(schema.habitLogs).where(and(
 		eq(schema.habitLogs.date, date),
@@ -155,7 +257,7 @@ export function calculateDailyScore(date: string) {
 	)).all();
 	const habitsScore = habits.length > 0 ? Math.round((habitLogs.length / habits.length) * 100) : 0;
 
-	// 3. Focus score: minutos enfocados vs target
+	// 3. Focus score
 	const focusResult = db.select({
 		totalMin: sql<number>`COALESCE(SUM((julianday(end_at) - julianday(start_at)) * 1440), 0)`
 	}).from(schema.timeBlocks).where(and(
@@ -165,26 +267,24 @@ export function calculateDailyScore(date: string) {
 	)).get();
 	const focusMin = focusResult?.totalMin ?? 0;
 	const focusTarget = profile.focusHoursTarget * 60;
-	const focusScore = Math.min(100, Math.round((focusMin / focusTarget) * 100));
+	const focusScore = focusTarget > 0 ? Math.min(100, Math.round((focusMin / focusTarget) * 100)) : 0;
 
-	// 4. Gym score: ¿entrenaste hoy? (binary 0 o 100)
+	// 4. Gym score
 	const workout = db.select().from(schema.workouts).where(eq(schema.workouts.date, date)).get();
 	const gymScore = workout ? 100 : 0;
 
-	// 5. Nutrition score: proteína vs target (lo más importante)
+	// 5. Nutrition score
 	const nutritionResult = db.select({
-		protein: sql<number>`COALESCE(SUM(${schema.mealFoods.grams} / 100.0 * ${schema.foods.proteinPer100g}), 0)`,
-		calories: sql<number>`COALESCE(SUM(${schema.mealFoods.grams} / 100.0 * ${schema.foods.caloriesPer100g}), 0)`
+		protein: sql<number>`COALESCE(SUM(${schema.mealFoods.grams} / 100.0 * ${schema.foods.proteinPer100g}), 0)`
 	}).from(schema.meals)
 		.innerJoin(schema.mealFoods, eq(schema.meals.id, schema.mealFoods.mealId))
 		.innerJoin(schema.foods, eq(schema.mealFoods.foodId, schema.foods.id))
 		.where(eq(schema.meals.date, date))
 		.get();
 	const protein = nutritionResult?.protein ?? 0;
-	const proteinPct = Math.min(100, Math.round((protein / profile.proteinTarget) * 100));
-	const nutritionScore = proteinPct;
+	const nutritionScore = profile.proteinTarget > 0 ? Math.min(100, Math.round((protein / profile.proteinTarget) * 100)) : 0;
 
-	// Total ponderado: sleep 20%, habits 25%, focus 25%, gym 15%, nutrition 15%
+	// Total ponderado
 	const totalScore = Math.round(
 		sleepScore * 0.20 +
 		habitsScore * 0.25 +
@@ -195,7 +295,7 @@ export function calculateDailyScore(date: string) {
 
 	const xpEarned = xpFromScore(totalScore);
 
-	// Upsert daily score
+	// Upsert
 	const existing = db.select().from(schema.dailyScores).where(eq(schema.dailyScores.date, date)).get();
 	if (existing) {
 		db.update(schema.dailyScores).set({
@@ -222,6 +322,29 @@ export function getDailyScore(date: string) {
 
 export function getScoreHistory(days = 14) {
 	return db.select().from(schema.dailyScores).orderBy(desc(schema.dailyScores.date)).limit(days).all();
+}
+
+// ─── STREAKS GLOBALES ───
+
+export function getGlobalStreak(): number {
+	const scores = db.select({ date: schema.dailyScores.date, totalScore: schema.dailyScores.totalScore })
+		.from(schema.dailyScores)
+		.orderBy(desc(schema.dailyScores.date))
+		.all();
+
+	let streak = 0;
+	const today = new Date();
+	for (const s of scores) {
+		const expected = new Date(today);
+		expected.setDate(expected.getDate() - streak);
+		const expectedStr = expected.toISOString().split('T')[0];
+		if (s.date === expectedStr && s.totalScore >= 40) {
+			streak++;
+		} else {
+			break;
+		}
+	}
+	return streak;
 }
 
 // ─── WEEKLY REVIEW ───

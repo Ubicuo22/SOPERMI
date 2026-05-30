@@ -1,5 +1,5 @@
 import type { PageServerLoad } from './$types';
-import { getProfile, getRules, getActiveGoals, getDailyScore, calculateDailyScore, getScoreHistory, getSleepLog } from '$lib/db/queries/yo';
+import { getProfile, getRules, getActiveGoals, getDailyScore, calculateDailyScore, getScoreHistory, getSleepLog, getDailyCockpit, getGlobalStreak } from '$lib/db/queries/yo';
 
 export const load: PageServerLoad = async () => {
 	const today = new Date().toISOString().split('T')[0];
@@ -9,6 +9,8 @@ export const load: PageServerLoad = async () => {
 	const score = getDailyScore(today) || calculateDailyScore(today);
 	const scoreHistory = getScoreHistory();
 	const sleep = getSleepLog(today);
+	const cockpit = getDailyCockpit(today);
+	const streak = getGlobalStreak();
 
-	return { today, profile, rules, goals, score, scoreHistory, sleep };
+	return { today, profile, rules, goals, score, scoreHistory, sleep, cockpit, streak };
 };

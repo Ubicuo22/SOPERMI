@@ -5,7 +5,7 @@
 
 	let { data } = $props();
 
-	let activeTab = $state<'score' | 'goals' | 'rules' | 'config'>('score');
+	let activeTab = $state<'hoy' | 'score' | 'goals' | 'rules' | 'config'>('hoy');
 
 	// Sleep form
 	let sleepSleptAt = $state(data.sleep?.sleptAt || '');
@@ -46,16 +46,25 @@
 		invalidateAll();
 	}
 
+	async function toggleHabit(habitId: number) {
+		const id = parseInt(String(habitId));
+		await fetch('/api/habits?action=toggle', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ habitId: id, date: data.today })
+		});
+		await fetch(`/api/yo?action=calculate&date=${data.today}`);
+		invalidateAll();
+	}
+
 	async function addGoal() {
 		if (!goalTitle) return;
 		await fetch('/api/yo?action=goal', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({
-				title: goalTitle,
-				category: goalCategory,
-				metric: goalMetric || null,
-				targetValue: goalTarget ? parseFloat(goalTarget) : null,
+				title: goalTitle, category: goalCategory,
+				metric: goalMetric || null, targetValue: goalTarget ? parseFloat(goalTarget) : null,
 				deadline: goalDeadline || null
 			})
 		});
@@ -104,14 +113,10 @@
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({
-				name: configName,
-				identity: configIdentity || null,
-				sleepTarget: configSleepTarget,
-				wakeTarget: configWakeTarget,
-				focusHoursTarget: configFocusHours,
-				caloriesTarget: configCalories,
-				proteinTarget: configProtein,
-				gymDaysWeek: configGymDays
+				name: configName, identity: configIdentity || null,
+				sleepTarget: configSleepTarget, wakeTarget: configWakeTarget,
+				focusHoursTarget: configFocusHours, caloriesTarget: configCalories,
+				proteinTarget: configProtein, gymDaysWeek: configGymDays
 			})
 		});
 		invalidateAll();
@@ -131,57 +136,176 @@
 		return 'bg-danger';
 	}
 
+	function completionColor(pct: number): string {
+		if (pct >= 80) return 'text-accent';
+		if (pct >= 50) return 'text-t1';
+		return 'text-t2';
+	}
+
 	const categoryIcons: Record<string, string> = {
 		discipline: '///', health: '+', money: '$', growth: '^', general: '*',
-		body: '+', mind: '^', craft: '/',
+		body: '+', mind: '^', craft: '/', money2: '$'
 	};
 </script>
 
 <TopBar title="yo" />
 
 <div class="px-4 pb-4 space-y-4">
-	<!-- Character header -->
+	<!-- Character header — siempre visible -->
 	<div class="bg-surface border border-border rounded-[14px] p-4">
 		<div class="flex items-center justify-between">
 			<div>
-				<span class="text-[11px] text-t2 uppercase tracking-[0.08em]">nivel {data.profile.level}</span>
-				<h2 class="font-mono text-xl font-bold text-accent">{data.profile.name}</h2>
+				<div class="flex items-center gap-2">
+					<span class="font-mono text-[10px] text-bg bg-accent px-1.5 py-0.5 rounded font-bold">LV{data.profile.level}</span>
+					<h2 class="font-mono text-lg font-bold text-t1">{data.profile.name}</h2>
+				</div>
 				{#if data.profile.identity}
 					<p class="text-[11px] text-t2 mt-0.5 italic">"{data.profile.identity}"</p>
 				{/if}
 			</div>
 			<div class="text-right">
-				<span class="font-mono text-2xl font-bold {scoreColor(data.score?.totalScore ?? 0)}">{data.score?.totalScore ?? 0}</span>
-				<span class="text-[10px] text-t3 block">score hoy</span>
+				<span class="font-mono text-3xl font-bold {scoreColor(data.score?.totalScore ?? 0)}">{data.score?.totalScore ?? 0}</span>
+				<div class="flex items-center justify-end gap-1 mt-0.5">
+					{#if data.streak > 0}
+						<span class="font-mono text-[10px] text-accent">{data.streak}d streak</span>
+					{/if}
+				</div>
 			</div>
 		</div>
 
 		<!-- XP bar -->
-		<div class="mt-3">
-			<div class="flex justify-between text-[10px] text-t3 mb-1">
-				<span>XP {data.profile.xpInfo.current}/{data.profile.xpInfo.needed}</span>
-				<span>LVL {data.profile.level + 1}</span>
+		<div class="mt-2.5">
+			<div class="flex justify-between text-[9px] text-t3 mb-0.5">
+				<span>{data.profile.xpInfo.current} / {data.profile.xpInfo.needed} XP</span>
+				<span>LV{data.profile.level + 1}</span>
 			</div>
-			<div class="h-1.5 bg-elevated rounded-full overflow-hidden">
+			<div class="h-1 bg-elevated rounded-full overflow-hidden">
 				<div class="h-full bg-accent rounded-full transition-all" style="width: {data.profile.xpInfo.progress}%"></div>
 			</div>
 		</div>
 	</div>
 
 	<!-- Tab selector -->
-	<div class="flex gap-1 bg-surface rounded-lg p-1">
-		{#each ['score', 'goals', 'rules', 'config'] as tab}
+	<div class="flex gap-0.5 bg-surface rounded-lg p-1">
+		{#each ['hoy', 'score', 'goals', 'rules', 'config'] as tab}
 			<button
 				onclick={() => activeTab = tab as typeof activeTab}
-				class="flex-1 py-2 rounded-md text-[11px] uppercase tracking-[0.06em] transition-colors
+				class="flex-1 py-1.5 rounded-md text-[10px] uppercase tracking-[0.06em] transition-colors
 					{activeTab === tab ? 'bg-elevated text-t1' : 'text-t3'}"
 			>{tab}</button>
 		{/each}
 	</div>
 
-	<!-- SCORE TAB -->
-	{#if activeTab === 'score'}
-		<!-- Score breakdown -->
+	<!-- ═══════ HOY TAB — COCKPIT DIARIO ═══════ -->
+	{#if activeTab === 'hoy'}
+
+		<!-- Completion ring -->
+		<div class="flex items-center justify-center gap-4 py-2">
+			<div class="relative w-20 h-20">
+				<svg viewBox="0 0 36 36" class="w-full h-full -rotate-90">
+					<circle cx="18" cy="18" r="15.9" fill="none" stroke="#1e1e1e" stroke-width="2.5" />
+					<circle cx="18" cy="18" r="15.9" fill="none"
+						stroke={data.cockpit.completionPct >= 80 ? '#b8f240' : data.cockpit.completionPct >= 50 ? '#f0f0f0' : '#444444'}
+						stroke-width="2.5"
+						stroke-dasharray="{data.cockpit.completionPct}, 100"
+						stroke-linecap="round" />
+				</svg>
+				<div class="absolute inset-0 flex flex-col items-center justify-center">
+					<span class="font-mono text-lg font-bold {completionColor(data.cockpit.completionPct)}">{data.cockpit.completionPct}%</span>
+				</div>
+			</div>
+			<div>
+				<span class="text-[11px] text-t2 block">{data.cockpit.doneItems} de {data.cockpit.totalItems}</span>
+				<span class="text-[10px] text-t3 block">completado hoy</span>
+			</div>
+		</div>
+
+		<!-- Checklist del día -->
+		<div class="space-y-1">
+			<span class="text-[11px] text-t2 uppercase tracking-[0.08em]">checklist del dia</span>
+			{#each data.cockpit.checklist as item}
+				{@const isHabit = item.id.startsWith('habit-')}
+				<button
+					onclick={() => {
+						if (isHabit) {
+							const habitId = parseInt(item.id.split('-')[1]);
+							toggleHabit(habitId);
+						} else if (item.id === 'sleep' && !item.done) {
+							activeTab = 'score';
+						} else if (item.id === 'gym') {
+							window.location.href = '/gym';
+						} else if (item.id === 'focus') {
+							window.location.href = '/time';
+						} else if (item.id === 'protein') {
+							window.location.href = '/meals';
+						}
+					}}
+					class="w-full flex items-center gap-3 py-2.5 px-3 rounded-lg transition-colors
+						{item.done ? 'bg-surface' : 'bg-elevated border border-border'}"
+				>
+					<div class="w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0
+						{item.done ? 'bg-accent border-accent' : 'border-t3'}">
+						{#if item.done}
+							<svg width="10" height="10" viewBox="0 0 12 12" fill="none">
+								<path d="M2 6L5 9L10 3" stroke="#0a0a0a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+							</svg>
+						{/if}
+					</div>
+					<span class="text-[13px] flex-1 text-left {item.done ? 'text-t2 line-through' : 'text-t1'}">{item.label}</span>
+					{#if item.detail}
+						<span class="text-[10px] text-t3 font-mono">{item.detail}</span>
+					{/if}
+				</button>
+			{/each}
+		</div>
+
+		<!-- Métricas rápidas -->
+		<div class="grid grid-cols-3 gap-2">
+			<MetricCard label="foco" value="{data.cockpit.focusMinutes}m" accent={data.cockpit.focusMinutes > 0} />
+			<MetricCard label="proteina" value="{data.cockpit.protein}g" accent={data.cockpit.protein >= data.profile.proteinTarget} />
+			<MetricCard label="calorias" value="{data.cockpit.calories}" />
+		</div>
+
+		<!-- Tareas pendientes -->
+		{#if data.cockpit.pendingTasks.length > 0}
+			<div class="space-y-1">
+				<div class="flex items-center justify-between">
+					<span class="text-[11px] text-t2 uppercase tracking-[0.08em]">tareas pendientes</span>
+					<a href="/time" class="text-[10px] text-accent">ver todas</a>
+				</div>
+				{#each data.cockpit.pendingTasks as task}
+					<div class="flex items-center gap-2 py-1.5">
+						<span class="text-[10px] text-t3 font-mono w-4">P{task.priority}</span>
+						<span class="text-[13px] text-t1">{task.title}</span>
+					</div>
+				{/each}
+			</div>
+		{/if}
+
+		<!-- Goals activos (resumen) -->
+		{#if data.goals.length > 0}
+			<div class="space-y-1">
+				<div class="flex items-center justify-between">
+					<span class="text-[11px] text-t2 uppercase tracking-[0.08em]">metas activas</span>
+					<button onclick={() => activeTab = 'goals'} class="text-[10px] text-accent">ver todas</button>
+				</div>
+				{#each data.goals.slice(0, 3) as goal}
+					{@const pct = goal.targetValue ? Math.round((goal.currentValue / goal.targetValue) * 100) : 0}
+					<div class="flex items-center gap-2">
+						<span class="text-[13px] flex-1 truncate">{goal.title}</span>
+						{#if goal.targetValue}
+							<div class="w-16 h-1 bg-elevated rounded-full overflow-hidden">
+								<div class="h-full bg-accent rounded-full" style="width: {Math.min(pct, 100)}%"></div>
+							</div>
+							<span class="font-mono text-[10px] text-t3">{pct}%</span>
+						{/if}
+					</div>
+				{/each}
+			</div>
+		{/if}
+
+	<!-- ═══════ SCORE TAB ═══════ -->
+	{:else if activeTab === 'score'}
 		<div class="space-y-2">
 			<span class="text-[11px] text-t2 uppercase tracking-[0.08em]">breakdown de hoy</span>
 			{#each [
@@ -196,7 +320,7 @@
 					<div class="flex-1 h-1.5 bg-elevated rounded-full overflow-hidden">
 						<div class="{scoreBg(item.value)} h-full rounded-full transition-all" style="width: {item.value}%"></div>
 					</div>
-					<span class="font-mono text-[11px] text-t2 w-8 text-right">{item.value}</span>
+					<span class="font-mono text-[11px] {scoreColor(item.value)} w-8 text-right">{item.value}</span>
 					<span class="text-[9px] text-t3 w-6">{item.weight}</span>
 				</div>
 			{/each}
@@ -208,15 +332,15 @@
 			<div class="grid grid-cols-2 gap-2">
 				<div>
 					<label class="text-[10px] text-t3 block mb-1">me dormi</label>
-					<input type="time" bind:value={sleepSleptAt} class="w-full bg-elevated border border-border rounded-lg px-2 py-2 font-mono text-sm text-t1 outline-none" />
+					<input type="time" bind:value={sleepSleptAt} class="w-full bg-elevated border border-border rounded-lg px-2 py-2 font-mono text-sm text-t1 outline-none focus:border-accent-dim" />
 				</div>
 				<div>
 					<label class="text-[10px] text-t3 block mb-1">desperte</label>
-					<input type="time" bind:value={sleepWokeAt} class="w-full bg-elevated border border-border rounded-lg px-2 py-2 font-mono text-sm text-t1 outline-none" />
+					<input type="time" bind:value={sleepWokeAt} class="w-full bg-elevated border border-border rounded-lg px-2 py-2 font-mono text-sm text-t1 outline-none focus:border-accent-dim" />
 				</div>
 			</div>
 			<div>
-				<label class="text-[10px] text-t3 block mb-1">calidad (1-5)</label>
+				<label class="text-[10px] text-t3 block mb-1">calidad</label>
 				<div class="flex gap-1">
 					{#each [1,2,3,4,5] as q}
 						<button
@@ -230,19 +354,22 @@
 			<button onclick={logSleep} class="w-full bg-accent text-bg font-medium text-xs py-2.5 rounded-lg active:scale-[0.98] transition-transform">guardar sueno</button>
 		</div>
 
-		<!-- Score history mini chart -->
+		<!-- Score history -->
 		{#if data.scoreHistory.length > 0}
 			<div class="space-y-2">
 				<span class="text-[11px] text-t2 uppercase tracking-[0.08em]">ultimos 14 dias</span>
-				<div class="flex items-end gap-[3px] h-12">
+				<div class="flex items-end gap-[3px] h-16">
 					{#each data.scoreHistory.slice().reverse() as day}
-						<div class="flex-1 rounded-sm {scoreBg(day.totalScore)}" style="height: {Math.max(4, day.totalScore)}%; opacity: 0.8"></div>
+						<div class="flex-1 flex flex-col items-center gap-0.5">
+							<span class="text-[8px] font-mono text-t3">{day.totalScore}</span>
+							<div class="w-full rounded-sm {scoreBg(day.totalScore)}" style="height: {Math.max(4, day.totalScore * 0.4)}px"></div>
+						</div>
 					{/each}
 				</div>
 			</div>
 		{/if}
 
-	<!-- GOALS TAB -->
+	<!-- ═══════ GOALS TAB ═══════ -->
 	{:else if activeTab === 'goals'}
 		<div class="space-y-2">
 			{#if data.goals.length === 0}
@@ -253,7 +380,7 @@
 				<div class="bg-surface border border-border rounded-[14px] p-3.5">
 					<div class="flex items-center justify-between">
 						<div class="flex items-center gap-2">
-							<span class="font-mono text-[10px] text-accent bg-accent-bg px-1.5 py-0.5 rounded">{categoryIcons[goal.category] || '*'}</span>
+							<span class="font-mono text-[10px] text-accent bg-accent-bg px-1.5 py-0.5 rounded">{goal.category}</span>
 							<span class="text-[13px]">{goal.title}</span>
 						</div>
 						{#if goal.deadline}
@@ -277,9 +404,7 @@
 				</div>
 			{/each}
 
-			<button onclick={() => showGoalForm = true} class="w-full py-2 border border-dashed border-t3 rounded-lg text-t3 text-xs active:bg-elevated transition-colors">
-				+ nueva meta
-			</button>
+			<button onclick={() => showGoalForm = true} class="w-full py-2 border border-dashed border-t3 rounded-lg text-t3 text-xs active:bg-elevated transition-colors">+ nueva meta</button>
 		</div>
 
 		{#if showGoalForm}
@@ -303,15 +428,15 @@
 			</div>
 		{/if}
 
-	<!-- RULES TAB -->
+	<!-- ═══════ RULES TAB ═══════ -->
 	{:else if activeTab === 'rules'}
 		<div class="space-y-2">
-			<p class="text-[11px] text-t3">principios no negociables que guian tus decisiones</p>
+			<p class="text-[11px] text-t3">principios no negociables</p>
 			{#if data.rules.length === 0}
 				<p class="text-t2 text-xs py-4 text-center">sin reglas definidas</p>
 			{/if}
 			{#each data.rules as rule, i}
-				<div class="flex items-center gap-2 py-2 border-b border-border-soft">
+				<div class="flex items-center gap-2 py-2.5 px-3 bg-surface rounded-lg">
 					<span class="font-mono text-[10px] text-accent w-5">{String(i + 1).padStart(2, '0')}</span>
 					<span class="text-[13px] flex-1">{rule.text}</span>
 					<span class="text-[9px] text-t3 bg-elevated px-1.5 py-0.5 rounded">{rule.category}</span>
@@ -320,25 +445,23 @@
 			{/each}
 
 			{#if showRuleForm}
-				<div class="flex gap-2">
-					<input type="text" bind:value={ruleText} placeholder="nueva regla..." class="flex-1 bg-elevated border border-border rounded-lg px-3 py-2 text-[13px] text-t1 placeholder:text-t3 outline-none" />
-					<select bind:value={ruleCategory} class="bg-elevated border border-border rounded-lg px-2 py-2 text-[10px] text-t1 outline-none">
+				<div class="space-y-2">
+					<input type="text" bind:value={ruleText} placeholder="nueva regla..." class="w-full bg-elevated border border-border rounded-lg px-3 py-2.5 text-[13px] text-t1 placeholder:text-t3 outline-none" />
+					<select bind:value={ruleCategory} class="w-full bg-elevated border border-border rounded-lg px-2 py-2.5 text-[11px] text-t1 outline-none">
 						<option value="discipline">discipline</option>
 						<option value="health">health</option>
 						<option value="money">money</option>
 						<option value="growth">growth</option>
 						<option value="general">general</option>
 					</select>
+					<button onclick={addRule} class="w-full bg-accent text-bg font-medium text-xs py-2.5 rounded-lg active:scale-[0.98]">guardar regla</button>
 				</div>
-				<button onclick={addRule} class="w-full bg-accent text-bg font-medium text-xs py-2.5 rounded-lg active:scale-[0.98]">guardar regla</button>
 			{:else}
-				<button onclick={() => showRuleForm = true} class="w-full py-2 border border-dashed border-t3 rounded-lg text-t3 text-xs active:bg-elevated transition-colors">
-					+ nueva regla
-				</button>
+				<button onclick={() => showRuleForm = true} class="w-full py-2 border border-dashed border-t3 rounded-lg text-t3 text-xs active:bg-elevated transition-colors">+ nueva regla</button>
 			{/if}
 		</div>
 
-	<!-- CONFIG TAB -->
+	<!-- ═══════ CONFIG TAB ═══════ -->
 	{:else if activeTab === 'config'}
 		<div class="space-y-3">
 			<span class="text-[11px] text-t2 uppercase tracking-[0.08em]">identidad</span>
