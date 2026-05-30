@@ -1,5 +1,8 @@
 <script lang="ts">
 	import TopBar from '$lib/components/TopBar.svelte';
+	import EmptyState from '$lib/components/ui/EmptyState.svelte';
+	import { scale } from 'svelte/transition';
+	import { backOut } from 'svelte/easing';
 	import { invalidateAll } from '$app/navigation';
 
 	let { data } = $props();
@@ -34,28 +37,29 @@
 
 <div class="px-4 pb-4 space-y-4">
 	{#if data.habits.length === 0}
-		<p class="text-t2 text-xs py-8 text-center">sin hábitos — agrega uno con +</p>
+		<EmptyState text="sin hábitos" hint />
 	{/if}
 
 	{#each data.habits as habit}
 		{@const done = isCompletedToday(habit.logs)}
-		<div class="bg-surface border border-border rounded-[14px] p-3.5 space-y-2">
+		<div class="bg-surface border border-border rounded-card p-3.5 space-y-2">
 			<div class="flex items-center justify-between">
 				<div class="flex items-center gap-2">
 					<button
 						onclick={() => toggle(habit.id)}
+						aria-label="marcar {habit.name}"
 						class="w-6 h-6 rounded-md border-2 flex items-center justify-center transition-colors
 							{done ? 'bg-accent border-accent' : 'border-t3'}"
 					>
 						{#if done}
-							<svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+							<svg width="12" height="12" viewBox="0 0 12 12" fill="none" transition:scale={{ duration: 200, easing: backOut }}>
 								<path d="M2 6L5 9L10 3" stroke="#0a0a0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 							</svg>
 						{/if}
 					</button>
-					<span class="text-[13px] {done ? 'text-t1' : 'text-t2'}">{habit.name}</span>
+					<span class="text-body {done ? 'text-t1' : 'text-t2'}">{habit.name}</span>
 				</div>
-				<span class="font-mono text-[11px] text-accent">{habit.streak}d</span>
+				<span class="font-mono text-label text-accent">{habit.streak}d</span>
 			</div>
 
 			<div class="grid grid-cols-7 gap-[3px]">

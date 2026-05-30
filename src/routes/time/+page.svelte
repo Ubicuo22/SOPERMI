@@ -77,11 +77,11 @@
 
 <div class="px-4 pb-4 space-y-4">
 	<div class="flex flex-col items-center py-6">
-		<span class="font-mono text-4xl text-accent font-bold">{formatTime(timeLeft)}</span>
-		<span class="text-[11px] text-t2 mt-1">{timerRunning ? 'enfocado' : 'listo'}</span>
+		<span class="font-mono text-hero text-accent font-bold">{formatTime(timeLeft)}</span>
+		<span class="text-label text-t2 mt-1">{timerRunning ? 'enfocado' : 'listo'}</span>
 		<button
 			onclick={toggleTimer}
-			class="mt-4 px-6 py-2 rounded-lg text-sm font-medium transition-colors
+			class="mt-4 px-6 py-2 rounded-lg text-sub font-medium transition-colors
 				{timerRunning ? 'bg-danger/20 text-danger' : 'bg-accent text-bg'}"
 		>
 			{timerRunning ? 'detener' : 'iniciar'}

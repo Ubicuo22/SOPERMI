@@ -29,7 +29,7 @@
 			<a
 				href={opt.href}
 				onclick={() => open = false}
-				class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-t1 text-[13px] hover:bg-elevated transition-colors"
+				class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-t1 text-body hover:bg-elevated transition-colors"
 			>
 				<opt.icon size={16} class="text-t2" />
 				{opt.label}

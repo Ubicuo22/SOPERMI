@@ -21,8 +21,8 @@
 
 <div class="px-4 pb-4 space-y-4">
 	<div class="flex items-center justify-center py-3">
-		<span class="font-mono text-4xl font-bold text-accent">{data.macros.calories}</span>
-		<span class="text-t2 text-xs ml-2">kcal</span>
+		<span class="font-mono text-hero font-bold text-accent">{data.macros.calories}</span>
+		<span class="text-t2 text-meta ml-2">kcal</span>
 	</div>
 
 	<div class="grid grid-cols-3 gap-2">
@@ -34,24 +34,24 @@
 	<div class="space-y-2">
 		{#each mealTypes as type}
 			{@const meal = getMealByType(type)}
-			<div class="bg-surface border border-border rounded-[14px] p-3.5">
+			<div class="bg-surface border border-border rounded-card p-3.5">
 				<div class="flex items-center justify-between">
-					<span class="text-[11px] text-t2 uppercase tracking-[0.08em]">{mealLabels[type]}</span>
+					<span class="text-label text-t2 uppercase tracking-[0.08em]">{mealLabels[type]}</span>
 					{#if meal}
-						<span class="font-mono text-[11px] text-t2">{calcMealCals(meal)} kcal</span>
+						<span class="font-mono text-label text-t2">{calcMealCals(meal)} kcal</span>
 					{/if}
 				</div>
 				{#if meal && meal.foods.length > 0}
 					<div class="mt-2 space-y-1">
 						{#each meal.foods as f}
-							<div class="flex items-center justify-between text-[13px]">
+							<div class="flex items-center justify-between text-body">
 								<span>{f.foodName}</span>
-								<span class="font-mono text-t2 text-[11px]">{f.grams}g</span>
+								<span class="font-mono text-t2 text-label">{f.grams}g</span>
 							</div>
 						{/each}
 					</div>
 				{:else}
-					<p class="text-t3 text-[11px] mt-1">sin registros</p>
+					<p class="text-t3 text-label mt-1">sin registros</p>
 				{/if}
 			</div>
 		{/each}

@@ -34,8 +34,8 @@
 </script>
 
 <div class="flex flex-col items-center justify-center min-h-dvh bg-bg px-4">
-	<h1 class="font-mono text-accent text-2xl font-bold mb-2">SOPERMI</h1>
-	<p class="text-t2 text-xs mb-8">ingresa tu PIN</p>
+	<h1 class="font-mono text-accent text-metric font-bold mb-2">SOPERMI</h1>
+	<p class="text-t2 text-meta mb-8">ingresa tu PIN</p>
 
 	<div class="flex gap-2 mb-8">
 		{#each Array(6) as _, i}
@@ -44,7 +44,7 @@
 	</div>
 
 	{#if error}
-		<p class="text-danger text-xs mb-4">{error}</p>
+		<p class="text-danger text-meta mb-4">{error}</p>
 	{/if}
 
 	<div class="grid grid-cols-3 gap-3 w-full max-w-[240px]">
@@ -54,14 +54,14 @@
 			{:else if d === 'del'}
 				<button
 					onclick={removeDigit}
-					class="h-14 rounded-xl bg-elevated text-t2 text-sm font-sans active:bg-border transition-colors"
+					class="h-14 rounded-xl bg-elevated text-t2 text-sub font-sans active:bg-border transition-colors"
 				>
 					&larr;
 				</button>
 			{:else}
 				<button
 					onclick={() => addDigit(d)}
-					class="h-14 rounded-xl bg-surface border border-border text-t1 font-mono text-lg active:bg-elevated transition-colors"
+					class="h-14 rounded-xl bg-surface border border-border text-t1 font-mono text-metric active:bg-elevated transition-colors"
 				>
 					{d}
 				</button>

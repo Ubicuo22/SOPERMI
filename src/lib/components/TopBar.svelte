@@ -6,16 +6,13 @@
 	let { title }: Props = $props();
 
 	const today = new Date().toLocaleDateString('es-MX', {
-		weekday: 'short',
+		weekday: 'long',
 		day: 'numeric',
-		month: 'short'
+		month: 'long'
 	});
 </script>
 
 <header class="px-4 pt-5 pb-3">
-	<div class="flex items-center gap-2">
-		<div class="w-2 h-2 rounded-full bg-accent"></div>
-		<span class="text-xs text-t2">{today}</span>
-	</div>
-	<h1 class="text-[13px] font-medium font-sans mt-1">{title}</h1>
+	<span class="text-micro text-t3 uppercase tracking-[0.08em] block">{today}</span>
+	<h1 class="text-metric font-mono font-bold lowercase mt-0.5">{title}</h1>
 </header>
