@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { getWorkoutByDate, getWorkoutSets, createWorkout, addSet, getExercises, createExercise, getRecentWorkouts } from '$lib/db/queries/gym';
+import { getWorkoutByDate, getWorkoutSets, createWorkout, addSet, getExercises, createExercise, getRecentWorkouts, deleteSet, repeatLastWorkout, getLastWorkout } from '$lib/db/queries/gym';
 
 export const GET: RequestHandler = async ({ url }) => {
 	const date = url.searchParams.get('date') || new Date().toISOString().split('T')[0];
@@ -30,6 +30,16 @@ export const POST: RequestHandler = async ({ request, url }) => {
 
 	if (action === 'set') {
 		const result = addSet(body);
+		return json({ data: result });
+	}
+
+	if (action === 'delete-set') {
+		deleteSet(body.id);
+		return json({ data: { ok: true } });
+	}
+
+	if (action === 'repeat-last') {
+		const result = repeatLastWorkout(body.date);
 		return json({ data: result });
 	}
 

@@ -27,6 +27,12 @@
 	let ruleText = $state('');
 	let ruleCategory = $state<string>('discipline');
 
+	// Weekly review form
+	let reviewWins = $state(data.weekInfo.review?.wins || '');
+	let reviewLessons = $state(data.weekInfo.review?.lessons || '');
+	let reviewFocus = $state(data.weekInfo.review?.focusNext || '');
+	let reviewSaved = $state(false);
+
 	// Config form
 	let configName = $state(data.profile.name);
 	let configIdentity = $state(data.profile.identity || '');
@@ -121,6 +127,23 @@
 				proteinTarget: configProtein, gymDaysWeek: configGymDays
 			})
 		});
+		invalidateAll();
+	}
+
+	async function saveReview() {
+		await fetch('/api/yo?action=review', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				week: data.weekInfo.week,
+				wins: reviewWins || null,
+				lessons: reviewLessons || null,
+				focusNext: reviewFocus || null,
+				avgScore: data.weekInfo.avgScore
+			})
+		});
+		reviewSaved = true;
+		setTimeout(() => reviewSaved = false, 2000);
 		invalidateAll();
 	}
 
@@ -360,6 +383,29 @@
 				</div>
 			</div>
 		{/if}
+
+		<!-- Weekly review -->
+		<div class="bg-surface border border-border rounded-card p-3.5 space-y-2.5">
+			<div class="flex items-baseline justify-between">
+				<span class="text-label text-t2 uppercase tracking-[0.08em]">review · {data.weekInfo.week}</span>
+				<span class="font-mono text-meta {scoreColor(data.weekInfo.avgScore)}">prom {data.weekInfo.avgScore}</span>
+			</div>
+			<div class="space-y-1">
+				<span class="text-micro text-t3 block">qué salió bien</span>
+				<textarea bind:value={reviewWins} rows="2" placeholder="wins de la semana..." class="w-full bg-elevated border border-border rounded-control px-3 py-2 text-body text-t1 placeholder:text-t3 outline-none focus:border-accent-dim resize-none"></textarea>
+			</div>
+			<div class="space-y-1">
+				<span class="text-micro text-t3 block">qué ajustar</span>
+				<textarea bind:value={reviewLessons} rows="2" placeholder="lecciones..." class="w-full bg-elevated border border-border rounded-control px-3 py-2 text-body text-t1 placeholder:text-t3 outline-none focus:border-accent-dim resize-none"></textarea>
+			</div>
+			<div class="space-y-1">
+				<span class="text-micro text-t3 block">foco la próxima semana</span>
+				<textarea bind:value={reviewFocus} rows="2" placeholder="prioridad..." class="w-full bg-elevated border border-border rounded-control px-3 py-2 text-body text-t1 placeholder:text-t3 outline-none focus:border-accent-dim resize-none"></textarea>
+			</div>
+			<button onclick={saveReview} class="w-full bg-accent text-bg font-medium text-meta py-2.5 rounded-control active:scale-[0.98] transition-transform">
+				{reviewSaved ? 'guardado ✓' : 'guardar review'}
+			</button>
+		</div>
 
 	<!-- ═══════ GOALS TAB ═══════ -->
 	{:else if activeTab === 'goals'}

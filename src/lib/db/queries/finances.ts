@@ -64,3 +64,23 @@ export function deleteTransaction(id: number) {
 export function getCategories() {
 	return db.select().from(schema.categories).all();
 }
+
+// Transacciones rápidas: las combinaciones (descripción + monto + categoría)
+// más frecuentes del historial, para registrar con 1 tap.
+export function getQuickTransactions(limit = 6) {
+	return db.select({
+		amount: schema.transactions.amount,
+		type: schema.transactions.type,
+		categoryId: schema.transactions.categoryId,
+		description: schema.transactions.description,
+		categoryName: schema.categories.name,
+		count: sql<number>`COUNT(*)`
+	}).from(schema.transactions)
+		.leftJoin(schema.categories, eq(schema.transactions.categoryId, schema.categories.id))
+		.where(sql`${schema.transactions.description} IS NOT NULL AND ${schema.transactions.description} != ''`)
+		.groupBy(schema.transactions.description, schema.transactions.amount, schema.transactions.categoryId, schema.transactions.type)
+		.having(sql`COUNT(*) >= 2`)
+		.orderBy(desc(sql`COUNT(*)`))
+		.limit(limit)
+		.all();
+}

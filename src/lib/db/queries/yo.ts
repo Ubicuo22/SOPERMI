@@ -365,4 +365,31 @@ export function saveWeeklyReview(data: { week: string; wins?: string; lessons?: 
 	return db.insert(schema.weeklyReviews).values(data).run();
 }
 
+// Identificador de semana ISO (YYYY-Www) a partir de una fecha
+function isoWeek(date: Date): string {
+	const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+	const dayNum = d.getUTCDay() || 7;
+	d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+	const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+	const weekNo = Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
+	return `${d.getUTCFullYear()}-W${String(weekNo).padStart(2, '0')}`;
+}
+
+// Info de la semana actual: id, review guardado, promedio de score de los últimos 7 días
+export function getCurrentWeekInfo(today: string) {
+	const week = isoWeek(new Date(today));
+	const review = getWeeklyReview(week);
+
+	const start = new Date(today);
+	start.setDate(start.getDate() - 6);
+	const startStr = start.toISOString().split('T')[0];
+
+	const result = db.select({ avg: sql<number>`COALESCE(AVG(total_score), 0)` })
+		.from(schema.dailyScores)
+		.where(and(gte(schema.dailyScores.date, startStr), lte(schema.dailyScores.date, today)))
+		.get();
+
+	return { week, review, avgScore: Math.round(result?.avg ?? 0) };
+}
+
 export { xpForNextLevel, levelFromXp };

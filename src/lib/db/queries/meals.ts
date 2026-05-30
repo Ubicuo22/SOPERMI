@@ -45,12 +45,70 @@ export function getDayMacros(date: string) {
 	};
 }
 
-export function createMeal(date: string, mealType: 'breakfast' | 'lunch' | 'dinner' | 'snack') {
+type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack';
+
+export function createMeal(date: string, mealType: MealType) {
 	return db.insert(schema.meals).values({ date, mealType }).returning({ id: schema.meals.id }).get();
 }
 
 export function addFoodToMeal(mealId: number, foodId: number, grams: number) {
 	return db.insert(schema.mealFoods).values({ mealId, foodId, grams }).returning({ id: schema.mealFoods.id }).get();
+}
+
+// Busca el meal del día+tipo; lo crea si no existe. Devuelve el id.
+function getOrCreateMeal(date: string, mealType: MealType): number {
+	const existing = db.select().from(schema.meals)
+		.where(and(eq(schema.meals.date, date), eq(schema.meals.mealType, mealType)))
+		.get();
+	if (existing) return existing.id;
+	return createMeal(date, mealType).id;
+}
+
+// Agrega un alimento a un tipo de comida del día (crea el meal si hace falta)
+export function addFoodToMealType(date: string, mealType: MealType, foodId: number, grams: number) {
+	const mealId = getOrCreateMeal(date, mealType);
+	return addFoodToMeal(mealId, foodId, grams);
+}
+
+export function removeMealFood(id: number) {
+	return db.delete(schema.mealFoods).where(eq(schema.mealFoods.id, id)).run();
+}
+
+function previousDay(date: string): string {
+	const d = new Date(date);
+	d.setDate(d.getDate() - 1);
+	return d.toISOString().split('T')[0];
+}
+
+// Qué tipos de comida tuvo ayer con alimentos registrados
+export function getYesterdayMealTypes(date: string): MealType[] {
+	const yesterday = previousDay(date);
+	const rows = db.select({ mealType: schema.meals.mealType })
+		.from(schema.meals)
+		.innerJoin(schema.mealFoods, eq(schema.meals.id, schema.mealFoods.mealId))
+		.where(eq(schema.meals.date, yesterday))
+		.all();
+	return [...new Set(rows.map(r => r.mealType))] as MealType[];
+}
+
+// Copia los alimentos de ayer (de ese tipo) a hoy
+export function repeatYesterdayMeal(date: string, mealType: MealType) {
+	const yesterday = previousDay(date);
+	const yMeal = db.select().from(schema.meals)
+		.where(and(eq(schema.meals.date, yesterday), eq(schema.meals.mealType, mealType)))
+		.get();
+	if (!yMeal) return { copied: 0 };
+
+	const yFoods = db.select().from(schema.mealFoods)
+		.where(eq(schema.mealFoods.mealId, yMeal.id))
+		.all();
+	if (yFoods.length === 0) return { copied: 0 };
+
+	const todayMealId = getOrCreateMeal(date, mealType);
+	for (const f of yFoods) {
+		addFoodToMeal(todayMealId, f.foodId, f.grams);
+	}
+	return { copied: yFoods.length };
 }
 
 export function searchFoods(query: string) {

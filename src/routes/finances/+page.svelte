@@ -45,6 +45,21 @@
 		invalidateAll();
 	}
 
+	async function quickAdd(q: typeof data.quick[0]) {
+		await fetch('/api/finances', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				amount: q.amount,
+				type: q.type,
+				categoryId: q.categoryId,
+				description: q.description,
+				date: new Date().toISOString().split('T')[0]
+			})
+		});
+		invalidateAll();
+	}
+
 	function formatMoney(n: number) {
 		return `$${Math.abs(n).toLocaleString('es-MX', { minimumFractionDigits: 0 })}`;
 	}
@@ -58,6 +73,20 @@
 		<MetricCard label="ingresos" value={formatMoney(data.balance.income)} accent />
 		<MetricCard label="gastos" value={formatMoney(data.balance.expense)} />
 	</div>
+
+	{#if data.quick.length > 0}
+		<div class="space-y-2">
+			<SectionLabel>rápidas</SectionLabel>
+			<div class="flex flex-wrap gap-2">
+				{#each data.quick as q}
+					<button onclick={() => quickAdd(q)} class="flex items-center gap-1.5 bg-elevated border border-border rounded-control px-2.5 py-1.5 active:bg-border transition-colors">
+						<span class="text-meta text-t1">{q.description}</span>
+						<span class="font-mono text-micro tabular-nums {q.type === 'income' ? 'text-accent' : 'text-t2'}">{q.type === 'income' ? '+' : '-'}{formatMoney(q.amount)}</span>
+					</button>
+				{/each}
+			</div>
+		</div>
+	{/if}
 
 	{#if data.budgets.length > 0}
 		<div class="space-y-2">

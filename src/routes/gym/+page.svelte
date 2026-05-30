@@ -29,6 +29,24 @@
 		invalidateAll();
 	}
 
+	async function repeatLast() {
+		await fetch('/api/gym?action=repeat-last', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ date: data.today })
+		});
+		invalidateAll();
+	}
+
+	async function deleteSet(id: number) {
+		await fetch('/api/gym?action=delete-set', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ id })
+		});
+		invalidateAll();
+	}
+
 	async function submitSet() {
 		if (!formExercise || !formReps) return;
 		const setsForExercise = data.sets.filter(s => s.exerciseId === formExercise);
@@ -67,9 +85,14 @@
 
 <div class="px-4 pb-4 space-y-4">
 	{#if !data.workout}
-		<div class="flex flex-col items-center py-8">
-			<p class="text-t2 text-meta mb-4">sin workout hoy</p>
+		<div class="flex flex-col items-center py-8 gap-3">
+			<p class="text-t2 text-meta">sin workout hoy</p>
 			<Button onclick={startWorkout}>iniciar workout</Button>
+			{#if data.lastWorkout}
+				<button onclick={repeatLast} class="text-meta text-accent active:opacity-60">
+					repetir último{data.lastWorkout.name ? ` (${data.lastWorkout.name})` : ''}
+				</button>
+			{/if}
 		</div>
 	{:else}
 		<SectionLabel>{data.workout.name || 'workout'} — {data.sets.length} sets</SectionLabel>
@@ -79,14 +102,14 @@
 				<span class="text-label text-t2 uppercase tracking-[0.08em]">{group.exerciseName}</span>
 				<div class="mt-2 space-y-1">
 					{#each group.sets as s}
-						<div class="flex items-center gap-2 text-body">
+						<button onclick={() => deleteSet(s.id)} class="w-full flex items-center gap-2 text-body text-left active:opacity-50">
 							<span class="text-t3 font-mono w-4">{s.setNumber}</span>
 							<span class="font-mono tabular-nums">{s.weightKg ?? '-'}kg × {s.reps ?? '-'}</span>
 							{#if s.rpe}<span class="text-t3 text-micro">@{s.rpe}</span>{/if}
 							{#if s.isPr}
 								<span class="text-micro bg-accent-bg text-accent px-1.5 py-0.5 rounded-chip">PR</span>
 							{/if}
-						</div>
+						</button>
 					{/each}
 				</div>
 			</div>
