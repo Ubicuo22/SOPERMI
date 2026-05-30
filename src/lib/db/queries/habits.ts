@@ -1,14 +1,13 @@
 import { db, schema } from '../index';
 import { eq, and, gte, lte, desc } from 'drizzle-orm';
+import { addDaysLocal } from '../../date';
 
 export function getActiveHabits() {
 	return db.select().from(schema.habits).where(eq(schema.habits.active, 1)).all();
 }
 
 export function getLogs28Days(habitId: number, today: string) {
-	const start = new Date(today);
-	start.setDate(start.getDate() - 27);
-	const startStr = start.toISOString().split('T')[0];
+	const startStr = addDaysLocal(today, -27);
 
 	return db.select().from(schema.habitLogs)
 		.where(and(
@@ -30,13 +29,12 @@ export function getStreak(habitId: number, today: string): number {
 		.all();
 
 	let streak = 0;
-	const current = new Date(today);
+	let expected = today;
 
 	for (const log of logs) {
-		const expected = current.toISOString().split('T')[0];
 		if (log.date === expected) {
 			streak++;
-			current.setDate(current.getDate() - 1);
+			expected = addDaysLocal(expected, -1);
 		} else {
 			break;
 		}

@@ -1,5 +1,6 @@
 import { db, schema } from '../index';
 import { eq, and, like, desc, isNull, sql } from 'drizzle-orm';
+import { nowLocal } from '../../date';
 
 export function getTasksByDate(date: string) {
 	return db.select().from(schema.tasks)
@@ -16,7 +17,7 @@ export function createTask(data: { title: string; projectId?: number; priority?:
 
 export function completeTask(id: number) {
 	return db.update(schema.tasks)
-		.set({ status: 'done', completedAt: new Date().toISOString() })
+		.set({ status: 'done', completedAt: nowLocal() })
 		.where(eq(schema.tasks.id, id))
 		.run();
 }
@@ -26,13 +27,13 @@ export function startTimeBlock(taskId: number | null, label?: string) {
 		taskId,
 		label,
 		type: 'focus',
-		startAt: new Date().toISOString()
+		startAt: nowLocal()
 	}).returning({ id: schema.timeBlocks.id }).get();
 }
 
 export function endTimeBlock(id: number) {
 	return db.update(schema.timeBlocks)
-		.set({ endAt: new Date().toISOString() })
+		.set({ endAt: nowLocal() })
 		.where(eq(schema.timeBlocks.id, id))
 		.run();
 }

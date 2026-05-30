@@ -1,9 +1,10 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { monthLocal } from '$lib/date';
 import { getMonthBalance, getRecentTransactions, getBudgetUsage, createTransaction, deleteTransaction, getCategories } from '$lib/db/queries/finances';
 
 export const GET: RequestHandler = async ({ url }) => {
-	const month = url.searchParams.get('month') || new Date().toISOString().slice(0, 7);
+	const month = url.searchParams.get('month') || monthLocal();
 	const action = url.searchParams.get('action');
 
 	if (action === 'categories') {

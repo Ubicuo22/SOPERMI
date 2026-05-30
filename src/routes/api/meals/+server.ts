@@ -1,12 +1,13 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { todayLocal } from '$lib/date';
 import {
 	getMealsByDate, getDayMacros, createMeal, addFoodToMeal, searchFoods, createFood,
 	addFoodToMealType, removeMealFood, getYesterdayMealTypes, repeatYesterdayMeal
 } from '$lib/db/queries/meals';
 
 export const GET: RequestHandler = async ({ url }) => {
-	const date = url.searchParams.get('date') || new Date().toISOString().split('T')[0];
+	const date = url.searchParams.get('date') || todayLocal();
 	const action = url.searchParams.get('action');
 
 	if (action === 'search') {

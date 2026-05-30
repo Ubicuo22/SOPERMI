@@ -1,5 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { todayLocal } from '$lib/date';
 import {
 	getProfile, updateProfile,
 	getRules, createRule, deleteRule,
@@ -11,7 +12,7 @@ import {
 
 export const GET: RequestHandler = async ({ url }) => {
 	const action = url.searchParams.get('action');
-	const date = url.searchParams.get('date') || new Date().toISOString().split('T')[0];
+	const date = url.searchParams.get('date') || todayLocal();
 
 	if (action === 'profile') {
 		return json({ data: getProfile() });

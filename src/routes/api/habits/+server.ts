@@ -1,9 +1,10 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { todayLocal } from '$lib/date';
 import { getActiveHabits, getLogs28Days, getStreak, toggleHabitLog, createHabit } from '$lib/db/queries/habits';
 
 export const GET: RequestHandler = async ({ url }) => {
-	const date = url.searchParams.get('date') || new Date().toISOString().split('T')[0];
+	const date = url.searchParams.get('date') || todayLocal();
 	const habits = getActiveHabits();
 
 	const habitsWithData = habits.map(h => ({

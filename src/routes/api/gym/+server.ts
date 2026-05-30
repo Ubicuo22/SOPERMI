@@ -1,9 +1,10 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { todayLocal } from '$lib/date';
 import { getWorkoutByDate, getWorkoutSets, createWorkout, addSet, getExercises, createExercise, getRecentWorkouts, deleteSet, repeatLastWorkout, getLastWorkout } from '$lib/db/queries/gym';
 
 export const GET: RequestHandler = async ({ url }) => {
-	const date = url.searchParams.get('date') || new Date().toISOString().split('T')[0];
+	const date = url.searchParams.get('date') || todayLocal();
 	const action = url.searchParams.get('action');
 
 	if (action === 'exercises') {

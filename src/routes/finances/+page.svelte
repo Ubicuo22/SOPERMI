@@ -8,6 +8,7 @@
 	import EmptyState from '$lib/components/ui/EmptyState.svelte';
 	import { invalidateAll } from '$app/navigation';
 	import { page } from '$app/stores';
+	import { todayLocal } from '$lib/date';
 
 	let { data } = $props();
 
@@ -31,7 +32,7 @@
 				type: formType,
 				categoryId: formCategory,
 				description: formDesc || null,
-				date: new Date().toISOString().split('T')[0]
+				date: todayLocal()
 			})
 		});
 		showForm = false;
@@ -54,7 +55,7 @@
 				type: q.type,
 				categoryId: q.categoryId,
 				description: q.description,
-				date: new Date().toISOString().split('T')[0]
+				date: todayLocal()
 			})
 		});
 		invalidateAll();

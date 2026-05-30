@@ -1,5 +1,6 @@
 import { db, schema } from '../index';
 import { eq, and, like, desc, sql } from 'drizzle-orm';
+import { addDaysLocal } from '../../date';
 
 export function getMealsByDate(date: string) {
 	const meals = db.select().from(schema.meals)
@@ -75,9 +76,7 @@ export function removeMealFood(id: number) {
 }
 
 function previousDay(date: string): string {
-	const d = new Date(date);
-	d.setDate(d.getDate() - 1);
-	return d.toISOString().split('T')[0];
+	return addDaysLocal(date, -1);
 }
 
 // Qué tipos de comida tuvo ayer con alimentos registrados

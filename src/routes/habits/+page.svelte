@@ -4,6 +4,7 @@
 	import { scale } from 'svelte/transition';
 	import { backOut } from 'svelte/easing';
 	import { invalidateAll } from '$app/navigation';
+	import { addDaysLocal } from '$lib/date';
 
 	let { data } = $props();
 
@@ -23,9 +24,7 @@
 	function getLast28Days() {
 		const days = [];
 		for (let i = 27; i >= 0; i--) {
-			const d = new Date();
-			d.setDate(d.getDate() - i);
-			days.push(d.toISOString().split('T')[0]);
+			days.push(addDaysLocal(data.today, -i));
 		}
 		return days;
 	}

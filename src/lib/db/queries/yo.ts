@@ -1,5 +1,6 @@
 import { db, schema } from '../index';
 import { eq, and, desc, gte, lte, like, sql } from 'drizzle-orm';
+import { nowLocal, addDaysLocal } from '../../date';
 
 // ─── LEVEL SYSTEM ───
 // XP por nivel: nivel N requiere N * 100 XP acumulado
@@ -58,7 +59,7 @@ export function updateProfile(data: Partial<{
 	waterLiters: number;
 	gymDaysWeek: number;
 }>) {
-	return db.update(schema.profile).set({ ...data, updatedAt: new Date().toISOString() }).where(eq(schema.profile.id, 1)).run();
+	return db.update(schema.profile).set({ ...data, updatedAt: nowLocal() }).where(eq(schema.profile.id, 1)).run();
 }
 
 // ─── RULES ───
@@ -96,7 +97,7 @@ export function updateGoalProgress(id: number, currentValue: number) {
 	const updates: Record<string, unknown> = { currentValue };
 	if (goal.targetValue && currentValue >= goal.targetValue) {
 		updates.status = 'completed';
-		updates.completedAt = new Date().toISOString();
+		updates.completedAt = nowLocal();
 	}
 	return db.update(schema.goals).set(updates).where(eq(schema.goals.id, id)).run();
 }
@@ -330,20 +331,18 @@ export function getScoreHistory(days = 14) {
 
 // ─── STREAKS GLOBALES ───
 
-export function getGlobalStreak(): number {
+export function getGlobalStreak(today: string): number {
 	const scores = db.select({ date: schema.dailyScores.date, totalScore: schema.dailyScores.totalScore })
 		.from(schema.dailyScores)
 		.orderBy(desc(schema.dailyScores.date))
 		.all();
 
 	let streak = 0;
-	const today = new Date();
+	let expected = today;
 	for (const s of scores) {
-		const expected = new Date(today);
-		expected.setDate(expected.getDate() - streak);
-		const expectedStr = expected.toISOString().split('T')[0];
-		if (s.date === expectedStr && s.totalScore >= 40) {
+		if (s.date === expected && s.totalScore >= 40) {
 			streak++;
+			expected = addDaysLocal(expected, -1);
 		} else {
 			break;
 		}
@@ -365,9 +364,10 @@ export function saveWeeklyReview(data: { week: string; wins?: string; lessons?: 
 	return db.insert(schema.weeklyReviews).values(data).run();
 }
 
-// Identificador de semana ISO (YYYY-Www) a partir de una fecha
-function isoWeek(date: Date): string {
-	const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+// Identificador de semana ISO (YYYY-Www) a partir de una fecha local YYYY-MM-DD
+function isoWeek(dateStr: string): string {
+	const [y, m, day] = dateStr.split('-').map(Number);
+	const d = new Date(Date.UTC(y, m - 1, day));
 	const dayNum = d.getUTCDay() || 7;
 	d.setUTCDate(d.getUTCDate() + 4 - dayNum);
 	const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
@@ -377,12 +377,10 @@ function isoWeek(date: Date): string {
 
 // Info de la semana actual: id, review guardado, promedio de score de los últimos 7 días
 export function getCurrentWeekInfo(today: string) {
-	const week = isoWeek(new Date(today));
+	const week = isoWeek(today);
 	const review = getWeeklyReview(week);
 
-	const start = new Date(today);
-	start.setDate(start.getDate() - 6);
-	const startStr = start.toISOString().split('T')[0];
+	const startStr = addDaysLocal(today, -6);
 
 	const result = db.select({ avg: sql<number>`COALESCE(AVG(total_score), 0)` })
 		.from(schema.dailyScores)

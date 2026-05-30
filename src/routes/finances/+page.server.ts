@@ -1,8 +1,9 @@
 import type { PageServerLoad } from './$types';
+import { monthLocal } from '$lib/date';
 import { getMonthBalance, getRecentTransactions, getBudgetUsage, getCategories, getQuickTransactions } from '$lib/db/queries/finances';
 
 export const load: PageServerLoad = async ({ url }) => {
-	const month = url.searchParams.get('month') || new Date().toISOString().slice(0, 7);
+	const month = url.searchParams.get('month') || monthLocal();
 	return {
 		month,
 		balance: getMonthBalance(month),
