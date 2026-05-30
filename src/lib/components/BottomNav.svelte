@@ -12,16 +12,16 @@
 	];
 </script>
 
-<nav class="h-16 bg-surface border-t border-border flex items-center justify-around px-1">
+<nav class="bg-surface border-t border-border flex items-stretch justify-around px-1 pb-safe-bottom">
 	{#each tabs as tab}
 		{@const active = $page.url.pathname.startsWith(tab.href)}
 		<a
 			href={tab.href}
-			class="flex flex-col items-center justify-center gap-0.5 w-12 h-11 rounded-[10px] transition-colors
-				{active ? 'bg-elevated' : ''}"
+			class="flex flex-1 flex-col items-center justify-center gap-1 h-14 my-1 rounded-control transition-colors
+				{active ? 'bg-elevated' : 'active:bg-elevated/50'}"
 		>
-			<tab.icon size={18} class={active ? 'text-accent' : 'text-t2'} />
-			<span class="text-[8px] tracking-[0.03em] {active ? 'text-accent' : 'text-t2'}">{tab.label}</span>
+			<tab.icon size={20} class={active ? 'text-accent' : 'text-t2'} />
+			<span class="text-micro tracking-[0.02em] {active ? 'text-accent' : 'text-t2'}">{tab.label}</span>
 		</a>
 	{/each}
 </nav>

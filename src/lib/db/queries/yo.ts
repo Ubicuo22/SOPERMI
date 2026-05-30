@@ -67,7 +67,9 @@ export function getRules() {
 	return db.select().from(schema.rules).where(eq(schema.rules.active, 1)).orderBy(schema.rules.sortOrder).all();
 }
 
-export function createRule(data: { text: string; category?: string }) {
+type RuleCategory = 'discipline' | 'health' | 'money' | 'growth' | 'general';
+
+export function createRule(data: { text: string; category?: RuleCategory }) {
 	return db.insert(schema.rules).values(data).returning({ id: schema.rules.id }).get();
 }
 
@@ -81,7 +83,9 @@ export function getActiveGoals() {
 	return db.select().from(schema.goals).where(eq(schema.goals.status, 'active')).orderBy(schema.goals.deadline).all();
 }
 
-export function createGoal(data: { title: string; category?: string; metric?: string; targetValue?: number; deadline?: string }) {
+type GoalCategory = 'body' | 'mind' | 'money' | 'craft' | 'general';
+
+export function createGoal(data: { title: string; category?: GoalCategory; metric?: string; targetValue?: number; deadline?: string }) {
 	return db.insert(schema.goals).values(data).returning({ id: schema.goals.id }).get();
 }
 

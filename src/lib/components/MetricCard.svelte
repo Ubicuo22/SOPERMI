@@ -1,7 +1,7 @@
 <script lang="ts">
 	interface Props {
 		label: string;
-		value: string;
+		value: string | number;
 		accent?: boolean;
 	}
 

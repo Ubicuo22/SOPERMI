@@ -12,7 +12,7 @@
 {#if isLogin}
 	{@render children()}
 {:else}
-	<div class="flex flex-col h-dvh bg-bg relative">
+	<div class="flex flex-col h-dvh bg-bg relative pt-safe-top">
 		<main class="flex-1 overflow-y-auto">
 			{@render children()}
 		</main>

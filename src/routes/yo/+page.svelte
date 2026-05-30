@@ -1,7 +1,6 @@
 <script lang="ts">
 	import TopBar from '$lib/components/TopBar.svelte';
-	import MetricCard from '$lib/components/MetricCard.svelte';
-	import { invalidateAll } from '$app/navigation';
+	import { invalidateAll, goto } from '$app/navigation';
 
 	let { data } = $props();
 
@@ -233,11 +232,11 @@
 						} else if (item.id === 'sleep' && !item.done) {
 							activeTab = 'score';
 						} else if (item.id === 'gym') {
-							window.location.href = '/gym';
+							goto('/gym');
 						} else if (item.id === 'focus') {
-							window.location.href = '/time';
+							goto('/time');
 						} else if (item.id === 'protein') {
-							window.location.href = '/meals';
+							goto('/meals');
 						}
 					}}
 					class="w-full flex items-center gap-3 py-2.5 px-3 rounded-lg transition-colors
@@ -257,13 +256,6 @@
 					{/if}
 				</button>
 			{/each}
-		</div>
-
-		<!-- Métricas rápidas -->
-		<div class="grid grid-cols-3 gap-2">
-			<MetricCard label="foco" value="{data.cockpit.focusMinutes}m" accent={data.cockpit.focusMinutes > 0} />
-			<MetricCard label="proteína" value="{data.cockpit.protein}g" accent={data.cockpit.protein >= data.profile.proteinTarget} />
-			<MetricCard label="calorias" value="{data.cockpit.calories}" />
 		</div>
 
 		<!-- Tareas pendientes -->
