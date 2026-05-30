@@ -12,27 +12,35 @@
 	];
 </script>
 
-<div class="absolute bottom-20 right-4 z-50">
-	<button
-		onclick={() => open = !open}
-		class="w-12 h-12 rounded-full bg-accent flex items-center justify-center active:scale-95 transition-transform"
-	>
-		<IconPlus size={20} class="text-bg" />
-	</button>
-</div>
+<!-- FAB -->
+<button
+	onclick={() => open = !open}
+	class="w-12 h-12 rounded-full bg-accent flex items-center justify-center active:scale-95 transition-transform shadow-lg"
+>
+	<IconPlus size={20} class="text-bg transition-transform duration-200 {open ? 'rotate-45' : ''}" />
+</button>
 
 {#if open}
+	<!-- Backdrop -->
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<div class="fixed inset-0 z-40" onclick={() => open = false} onkeydown={() => {}}></div>
-	<div class="absolute bottom-[136px] right-4 z-50 bg-surface border border-border rounded-xl p-2 flex flex-col gap-1 min-w-[140px]">
+	<div
+		class="fixed inset-0 z-40"
+		onclick={() => open = false}
+		onkeydown={() => {}}
+	></div>
+	<!-- Menu -->
+	<div
+		class="fixed z-50 bg-surface border border-border rounded-card p-2 flex flex-col gap-0.5 min-w-[160px]"
+		style="right: 1rem; bottom: calc(4.5rem + env(safe-area-inset-bottom) + 4rem)"
+	>
 		{#each options as opt}
 			<a
 				href={opt.href}
 				onclick={() => open = false}
-				class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-t1 text-body hover:bg-elevated transition-colors"
+				class="flex items-center gap-3 px-3 py-2.5 rounded-control text-t1 text-body active:bg-elevated transition-colors"
 			>
-				<opt.icon size={16} class="text-t2" />
-				{opt.label}
+				<opt.icon size={16} class="text-t2 flex-shrink-0" />
+				<span>{opt.label}</span>
 			</a>
 		{/each}
 	</div>

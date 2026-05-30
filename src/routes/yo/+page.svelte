@@ -375,11 +375,11 @@
 			<div class="grid grid-cols-2 gap-2">
 				<div>
 					<label class="text-micro text-t3 block mb-1">me dormí</label>
-					<input type="time" bind:value={sleepSleptAt} class="w-full bg-elevated border border-border rounded-lg px-2 py-2 font-mono text-sub text-t1 outline-none focus:border-accent-dim" />
+					<input type="time" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" bind:value={sleepSleptAt} class="w-full bg-elevated border border-border rounded-lg px-2 py-2 font-mono text-sub text-t1 outline-none focus:border-accent-dim" />
 				</div>
 				<div>
 					<label class="text-micro text-t3 block mb-1">desperté</label>
-					<input type="time" bind:value={sleepWokeAt} class="w-full bg-elevated border border-border rounded-lg px-2 py-2 font-mono text-sub text-t1 outline-none focus:border-accent-dim" />
+					<input type="time" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" bind:value={sleepWokeAt} class="w-full bg-elevated border border-border rounded-lg px-2 py-2 font-mono text-sub text-t1 outline-none focus:border-accent-dim" />
 				</div>
 			</div>
 			<div>
@@ -477,7 +477,7 @@
 
 		{#if showGoalForm}
 			<div class="bg-surface border border-border rounded-card p-3.5 space-y-2">
-				<input type="text" bind:value={goalTitle} placeholder="título de la meta" class="w-full bg-elevated border border-border rounded-lg px-3 py-2 text-body text-t1 placeholder:text-t3 outline-none" />
+				<input type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" bind:value={goalTitle} placeholder="título de la meta" class="w-full bg-elevated border border-border rounded-lg px-3 py-2 text-body text-t1 placeholder:text-t3 outline-none" />
 				<div class="grid grid-cols-2 gap-2">
 					<select bind:value={goalCategory} class="bg-elevated border border-border rounded-lg px-2 py-2 text-label text-t1 outline-none">
 						<option value="body">body</option>
@@ -486,11 +486,11 @@
 						<option value="craft">craft</option>
 						<option value="general">general</option>
 					</select>
-					<input type="text" bind:value={goalMetric} placeholder="unidad (kg, $...)" class="bg-elevated border border-border rounded-lg px-2 py-2 text-label text-t1 placeholder:text-t3 outline-none" />
+					<input type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" bind:value={goalMetric} placeholder="unidad (kg, $...)" class="bg-elevated border border-border rounded-lg px-2 py-2 text-label text-t1 placeholder:text-t3 outline-none" />
 				</div>
 				<div class="grid grid-cols-2 gap-2">
-					<input type="number" bind:value={goalTarget} placeholder="valor objetivo" class="bg-elevated border border-border rounded-lg px-2 py-2 text-label text-t1 placeholder:text-t3 outline-none font-mono" />
-					<input type="date" bind:value={goalDeadline} class="bg-elevated border border-border rounded-lg px-2 py-2 text-label text-t1 outline-none" />
+					<input type="number" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" bind:value={goalTarget} placeholder="valor objetivo" class="bg-elevated border border-border rounded-lg px-2 py-2 text-label text-t1 placeholder:text-t3 outline-none font-mono" />
+					<input type="date" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" bind:value={goalDeadline} class="bg-elevated border border-border rounded-lg px-2 py-2 text-label text-t1 outline-none" />
 				</div>
 				<button onclick={addGoal} class="w-full bg-accent text-bg font-medium text-meta py-2.5 rounded-lg active:scale-[0.98]">guardar meta</button>
 			</div>
@@ -514,7 +514,7 @@
 
 			{#if showRuleForm}
 				<div class="space-y-2">
-					<input type="text" bind:value={ruleText} placeholder="nueva regla..." class="w-full bg-elevated border border-border rounded-lg px-3 py-2.5 text-body text-t1 placeholder:text-t3 outline-none" />
+					<input type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" bind:value={ruleText} placeholder="nueva regla..." class="w-full bg-elevated border border-border rounded-lg px-3 py-2.5 text-body text-t1 placeholder:text-t3 outline-none" />
 					<select bind:value={ruleCategory} class="w-full bg-elevated border border-border rounded-lg px-2 py-2.5 text-label text-t1 outline-none">
 						<option value="discipline">discipline</option>
 						<option value="health">health</option>
@@ -533,18 +533,18 @@
 	{:else if activeTab === 'config'}
 		<div class="space-y-3">
 			<span class="text-label text-t2 uppercase tracking-[0.08em]">identidad</span>
-			<input type="text" bind:value={configName} placeholder="tu nombre" class="w-full bg-elevated border border-border rounded-lg px-3 py-2.5 text-body text-t1 placeholder:text-t3 outline-none" />
-			<input type="text" bind:value={configIdentity} placeholder="soy alguien que..." class="w-full bg-elevated border border-border rounded-lg px-3 py-2.5 text-body text-t1 placeholder:text-t3 outline-none italic" />
+			<input type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" bind:value={configName} placeholder="tu nombre" class="w-full bg-elevated border border-border rounded-lg px-3 py-2.5 text-body text-t1 placeholder:text-t3 outline-none" />
+			<input type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" bind:value={configIdentity} placeholder="soy alguien que..." class="w-full bg-elevated border border-border rounded-lg px-3 py-2.5 text-body text-t1 placeholder:text-t3 outline-none italic" />
 
 			<span class="text-label text-t2 uppercase tracking-[0.08em] block pt-2">arquitectura de sueño</span>
 			<div class="grid grid-cols-2 gap-2">
 				<div>
 					<label class="text-micro text-t3 block mb-1">dormir a las</label>
-					<input type="time" bind:value={configSleepTarget} class="w-full bg-elevated border border-border rounded-lg px-2 py-2 font-mono text-sub text-t1 outline-none" />
+					<input type="time" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" bind:value={configSleepTarget} class="w-full bg-elevated border border-border rounded-lg px-2 py-2 font-mono text-sub text-t1 outline-none" />
 				</div>
 				<div>
 					<label class="text-micro text-t3 block mb-1">despertar a las</label>
-					<input type="time" bind:value={configWakeTarget} class="w-full bg-elevated border border-border rounded-lg px-2 py-2 font-mono text-sub text-t1 outline-none" />
+					<input type="time" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" bind:value={configWakeTarget} class="w-full bg-elevated border border-border rounded-lg px-2 py-2 font-mono text-sub text-t1 outline-none" />
 				</div>
 			</div>
 
@@ -552,21 +552,21 @@
 			<div class="grid grid-cols-2 gap-2">
 				<div>
 					<label class="text-micro text-t3 block mb-1">horas de foco</label>
-					<input type="number" bind:value={configFocusHours} class="w-full bg-elevated border border-border rounded-lg px-2 py-2 font-mono text-sub text-t1 outline-none" />
+					<input type="number" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" bind:value={configFocusHours} class="w-full bg-elevated border border-border rounded-lg px-2 py-2 font-mono text-sub text-t1 outline-none" />
 				</div>
 				<div>
 					<label class="text-micro text-t3 block mb-1">dias gym / semana</label>
-					<input type="number" bind:value={configGymDays} class="w-full bg-elevated border border-border rounded-lg px-2 py-2 font-mono text-sub text-t1 outline-none" />
+					<input type="number" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" bind:value={configGymDays} class="w-full bg-elevated border border-border rounded-lg px-2 py-2 font-mono text-sub text-t1 outline-none" />
 				</div>
 			</div>
 			<div class="grid grid-cols-2 gap-2">
 				<div>
 					<label class="text-micro text-t3 block mb-1">calorias target</label>
-					<input type="number" bind:value={configCalories} class="w-full bg-elevated border border-border rounded-lg px-2 py-2 font-mono text-sub text-t1 outline-none" />
+					<input type="number" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" bind:value={configCalories} class="w-full bg-elevated border border-border rounded-lg px-2 py-2 font-mono text-sub text-t1 outline-none" />
 				</div>
 				<div>
 					<label class="text-micro text-t3 block mb-1">proteína (g)</label>
-					<input type="number" bind:value={configProtein} class="w-full bg-elevated border border-border rounded-lg px-2 py-2 font-mono text-sub text-t1 outline-none" />
+					<input type="number" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" bind:value={configProtein} class="w-full bg-elevated border border-border rounded-lg px-2 py-2 font-mono text-sub text-t1 outline-none" />
 				</div>
 			</div>
 

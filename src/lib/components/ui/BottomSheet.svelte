@@ -32,7 +32,7 @@
 		class="fixed inset-x-0 bottom-0 z-50 flex justify-center"
 		transition:fly={{ y: 320, duration: 250, easing: cubicOut }}
 	>
-		<div class="bg-surface border-t border-border rounded-t-sheet w-full max-w-md p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] space-y-3">
+		<div class="bg-surface border-t border-border rounded-t-sheet w-full max-w-md p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] space-y-3 max-h-[85dvh] overflow-y-auto" style="-webkit-overflow-scrolling: touch; overscroll-behavior: contain;">
 			<!-- drag handle -->
 			<div class="flex justify-center -mt-1 mb-1">
 				<div class="w-9 h-1 rounded-full bg-t3"></div>

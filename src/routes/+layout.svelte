@@ -24,11 +24,22 @@
 {#if isLogin}
 	{@render children()}
 {:else}
-	<div class="flex flex-col h-dvh bg-bg relative pt-safe-top">
-		<main class="flex-1 overflow-y-auto">
+	<div class="flex flex-col h-dvh bg-bg" style="padding-top: env(safe-area-inset-top)">
+		<main
+			class="flex-1 overflow-y-auto"
+			style="-webkit-overflow-scrolling: touch; overscroll-behavior-y: contain;"
+		>
 			{@render children()}
+			<!-- espacio extra al final para que el contenido no quede debajo del nav -->
+			<div class="h-4"></div>
 		</main>
-		<QuickAdd />
+		<!-- FAB fixed — no se mueve al scrollear -->
+		<div
+			class="fixed z-50"
+			style="right: 1rem; bottom: calc(4.5rem + env(safe-area-inset-bottom) + 0.5rem)"
+		>
+			<QuickAdd />
+		</div>
 		<BottomNav />
 	</div>
 {/if}

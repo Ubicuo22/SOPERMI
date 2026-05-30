@@ -1,7 +1,7 @@
 <script lang="ts">
 	interface Props {
 		value: string | number;
-		type?: 'text' | 'number' | 'time' | 'date';
+		type?: 'text' | 'number' | 'time' | 'date' | 'email';
 		placeholder?: string;
 		label?: string;
 		mono?: boolean;
@@ -27,6 +27,10 @@
 		{placeholder}
 		{onchange}
 		bind:value
+		autocomplete="off"
+		autocorrect="off"
+		autocapitalize="off"
+		spellcheck={false}
 		class="w-full bg-elevated border border-border rounded-control px-3 py-2.5 text-body text-t1
 			placeholder:text-t3 outline-none focus:border-accent-dim transition-colors
 			{mono ? 'font-mono' : ''}"

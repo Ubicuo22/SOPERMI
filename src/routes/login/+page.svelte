@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+
 	let pin = $state('');
 	let error = $state('');
 	let loading = $state(false);
@@ -22,7 +24,7 @@
 			body: JSON.stringify({ pin })
 		});
 		if (res.ok) {
-			window.location.href = '/finances';
+			goto('/yo');
 		} else {
 			error = 'PIN incorrecto';
 			pin = '';
@@ -33,13 +35,20 @@
 	const digits = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', 'del'];
 </script>
 
-<div class="flex flex-col items-center justify-center min-h-dvh bg-bg px-4">
-	<h1 class="font-mono text-accent text-metric font-bold mb-2">SOPERMI</h1>
-	<p class="text-t2 text-meta mb-8">ingresa tu PIN</p>
+<!-- safe-area top e inset-bottom: funciona con notch y con home indicator -->
+<div
+	class="flex flex-col items-center justify-center bg-bg px-4"
+	style="min-height: 100dvh; padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom);"
+>
+	<h1 class="font-mono text-accent text-metric font-bold mb-1">SOPERMI</h1>
+	<p class="text-t2 text-meta mb-10">ingresa tu PIN</p>
 
-	<div class="flex gap-2 mb-8">
+	<!-- Puntos del PIN -->
+	<div class="flex gap-3 mb-10">
 		{#each Array(6) as _, i}
-			<div class="w-3 h-3 rounded-full {i < pin.length ? 'bg-accent' : 'bg-elevated border border-border'}"></div>
+			<div class="w-3 h-3 rounded-full transition-colors duration-150
+				{i < pin.length ? 'bg-accent scale-110' : 'bg-elevated border border-border'}">
+			</div>
 		{/each}
 	</div>
 
@@ -47,21 +56,25 @@
 		<p class="text-danger text-meta mb-4">{error}</p>
 	{/if}
 
-	<div class="grid grid-cols-3 gap-3 w-full max-w-[240px]">
+	<!-- Teclado numérico -->
+	<div class="grid grid-cols-3 gap-3 w-full max-w-[260px]">
 		{#each digits as d}
 			{#if d === ''}
 				<div></div>
 			{:else if d === 'del'}
 				<button
 					onclick={removeDigit}
-					class="h-14 rounded-xl bg-elevated text-t2 text-sub font-sans active:bg-border transition-colors"
+					class="h-16 rounded-card bg-elevated text-t2 text-metric font-sans
+						active:bg-border active:scale-95 transition-all duration-100"
 				>
-					&larr;
+					⌫
 				</button>
 			{:else}
 				<button
 					onclick={() => addDigit(d)}
-					class="h-14 rounded-xl bg-surface border border-border text-t1 font-mono text-metric active:bg-elevated transition-colors"
+					class="h-16 rounded-card bg-surface border border-border text-t1 font-mono text-metric
+						active:bg-elevated active:scale-95 transition-all duration-100
+						{loading ? 'opacity-50 pointer-events-none' : ''}"
 				>
 					{d}
 				</button>
