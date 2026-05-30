@@ -27,10 +27,10 @@ export function getMealsByDate(date: string) {
 
 export function getDayMacros(date: string) {
 	const result = db.select({
-		calories: sql<number>`COALESCE(SUM(mf.grams / 100.0 * f.calories_per_100g), 0)`,
-		protein: sql<number>`COALESCE(SUM(mf.grams / 100.0 * f.protein_per_100g), 0)`,
-		carbs: sql<number>`COALESCE(SUM(mf.grams / 100.0 * f.carbs_per_100g), 0)`,
-		fat: sql<number>`COALESCE(SUM(mf.grams / 100.0 * f.fat_per_100g), 0)`
+		calories: sql<number>`COALESCE(SUM(${schema.mealFoods.grams} / 100.0 * ${schema.foods.caloriesPer100g}), 0)`,
+		protein: sql<number>`COALESCE(SUM(${schema.mealFoods.grams} / 100.0 * ${schema.foods.proteinPer100g}), 0)`,
+		carbs: sql<number>`COALESCE(SUM(${schema.mealFoods.grams} / 100.0 * ${schema.foods.carbsPer100g}), 0)`,
+		fat: sql<number>`COALESCE(SUM(${schema.mealFoods.grams} / 100.0 * ${schema.foods.fatPer100g}), 0)`
 	}).from(schema.meals)
 		.innerJoin(schema.mealFoods, eq(schema.meals.id, schema.mealFoods.mealId))
 		.innerJoin(schema.foods, eq(schema.mealFoods.foodId, schema.foods.id))

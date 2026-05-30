@@ -129,3 +129,77 @@ export const habitLogs = sqliteTable('habit_logs', {
 	date: text('date').notNull(),
 	completed: integer('completed').notNull().default(1)
 });
+
+// ─── YO / IDENTIDAD / SISTEMA DE VIDA ───
+
+export const profile = sqliteTable('profile', {
+	id: integer('id').primaryKey().default(1),
+	name: text('name').notNull().default('player'),
+	identity: text('identity'),
+	sleepTarget: text('sleep_target').notNull().default('23:00'),
+	wakeTarget: text('wake_target').notNull().default('06:30'),
+	focusHoursTarget: integer('focus_hours_target').notNull().default(6),
+	caloriesTarget: integer('calories_target').notNull().default(2200),
+	proteinTarget: integer('protein_target').notNull().default(150),
+	waterLiters: real('water_liters').notNull().default(2.5),
+	gymDaysWeek: integer('gym_days_week').notNull().default(5),
+	level: integer('level').notNull().default(1),
+	totalXp: integer('total_xp').notNull().default(0),
+	updatedAt: text('updated_at').notNull().default("(datetime('now'))")
+});
+
+export const rules = sqliteTable('rules', {
+	id: integer('id').primaryKey({ autoIncrement: true }),
+	text: text('text').notNull(),
+	category: text('category', { enum: ['discipline', 'health', 'money', 'growth', 'general'] }).notNull().default('general'),
+	active: integer('active').notNull().default(1),
+	sortOrder: integer('sort_order').notNull().default(0),
+	createdAt: text('created_at').notNull().default("(datetime('now'))")
+});
+
+export const goals = sqliteTable('goals', {
+	id: integer('id').primaryKey({ autoIncrement: true }),
+	title: text('title').notNull(),
+	category: text('category', { enum: ['body', 'mind', 'money', 'craft', 'general'] }).notNull().default('general'),
+	metric: text('metric'),
+	targetValue: real('target_value'),
+	currentValue: real('current_value').notNull().default(0),
+	deadline: text('deadline'),
+	status: text('status', { enum: ['active', 'completed', 'failed', 'paused'] }).notNull().default('active'),
+	createdAt: text('created_at').notNull().default("(datetime('now'))"),
+	completedAt: text('completed_at')
+});
+
+export const dailyScores = sqliteTable('daily_scores', {
+	id: integer('id').primaryKey({ autoIncrement: true }),
+	date: text('date').notNull().unique(),
+	sleepScore: integer('sleep_score').notNull().default(0),
+	habitsScore: integer('habits_score').notNull().default(0),
+	focusScore: integer('focus_score').notNull().default(0),
+	gymScore: integer('gym_score').notNull().default(0),
+	nutritionScore: integer('nutrition_score').notNull().default(0),
+	totalScore: integer('total_score').notNull().default(0),
+	xpEarned: integer('xp_earned').notNull().default(0),
+	notes: text('notes'),
+	createdAt: text('created_at').notNull().default("(datetime('now'))")
+});
+
+export const sleepLogs = sqliteTable('sleep_logs', {
+	id: integer('id').primaryKey({ autoIncrement: true }),
+	date: text('date').notNull().unique(),
+	sleptAt: text('slept_at'),
+	wokeAt: text('woke_at'),
+	quality: integer('quality'),
+	hours: real('hours'),
+	createdAt: text('created_at').notNull().default("(datetime('now'))")
+});
+
+export const weeklyReviews = sqliteTable('weekly_reviews', {
+	id: integer('id').primaryKey({ autoIncrement: true }),
+	week: text('week').notNull().unique(),
+	wins: text('wins'),
+	lessons: text('lessons'),
+	focusNext: text('focus_next'),
+	avgScore: integer('avg_score'),
+	createdAt: text('created_at').notNull().default("(datetime('now'))")
+});

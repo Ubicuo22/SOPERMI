@@ -180,6 +180,91 @@ CREATE INDEX IF NOT EXISTS idx_habit_logs_date         ON habit_logs(date);
 CREATE INDEX IF NOT EXISTS idx_habit_logs_habit        ON habit_logs(habit_id);
 
 -- ─────────────────────────────────────────
+-- YO / IDENTIDAD / SISTEMA DE VIDA
+-- ─────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS profile (
+  id          INTEGER PRIMARY KEY DEFAULT 1,    -- singleton
+  name        TEXT    NOT NULL DEFAULT 'player',
+  identity    TEXT,                              -- "soy alguien que..." — identidad aspiracional
+  sleep_target TEXT   NOT NULL DEFAULT '23:00', -- hora objetivo de dormir (HH:MM)
+  wake_target  TEXT   NOT NULL DEFAULT '06:30', -- hora objetivo de despertar
+  focus_hours_target INTEGER NOT NULL DEFAULT 6,-- horas de trabajo profundo / día
+  calories_target    INTEGER NOT NULL DEFAULT 2200,
+  protein_target     INTEGER NOT NULL DEFAULT 150,
+  water_liters       REAL    NOT NULL DEFAULT 2.5,
+  gym_days_week      INTEGER NOT NULL DEFAULT 5,
+  level       INTEGER NOT NULL DEFAULT 1,
+  total_xp    INTEGER NOT NULL DEFAULT 0,
+  updated_at  TEXT    NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS rules (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  text        TEXT    NOT NULL,                  -- "no pantallas después de 22:00"
+  category    TEXT    NOT NULL DEFAULT 'general' -- discipline, health, money, growth
+                      CHECK(category IN ('discipline', 'health', 'money', 'growth', 'general')),
+  active      INTEGER NOT NULL DEFAULT 1,
+  sort_order  INTEGER NOT NULL DEFAULT 0,
+  created_at  TEXT    NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS goals (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  title       TEXT    NOT NULL,                  -- "pesar 75kg"
+  category    TEXT    NOT NULL DEFAULT 'general'
+                      CHECK(category IN ('body', 'mind', 'money', 'craft', 'general')),
+  metric      TEXT,                              -- "kg", "$", "min", etc
+  target_value REAL,                             -- valor objetivo numérico
+  current_value REAL   NOT NULL DEFAULT 0,
+  deadline    TEXT,                              -- YYYY-MM-DD
+  status      TEXT    NOT NULL DEFAULT 'active'
+                      CHECK(status IN ('active', 'completed', 'failed', 'paused')),
+  created_at  TEXT    NOT NULL DEFAULT (datetime('now')),
+  completed_at TEXT
+);
+
+CREATE TABLE IF NOT EXISTS daily_scores (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  date        TEXT    NOT NULL UNIQUE,           -- YYYY-MM-DD
+  -- componentes del score (0-100 cada uno)
+  sleep_score     INTEGER NOT NULL DEFAULT 0,   -- ¿dormiste a la hora target?
+  habits_score    INTEGER NOT NULL DEFAULT 0,   -- % de hábitos completados
+  focus_score     INTEGER NOT NULL DEFAULT 0,   -- minutos enfocados vs target
+  gym_score       INTEGER NOT NULL DEFAULT 0,   -- ¿entrenaste hoy?
+  nutrition_score INTEGER NOT NULL DEFAULT 0,   -- calorías/proteína vs target
+  -- total ponderado
+  total_score     INTEGER NOT NULL DEFAULT 0,   -- promedio ponderado 0-100
+  xp_earned       INTEGER NOT NULL DEFAULT 0,   -- XP ganado ese día
+  notes           TEXT,                          -- reflexión opcional
+  created_at      TEXT    NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS sleep_logs (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  date        TEXT    NOT NULL UNIQUE,           -- la fecha del día (no la noche)
+  slept_at    TEXT,                              -- HH:MM que se durmió
+  woke_at     TEXT,                              -- HH:MM que despertó
+  quality     INTEGER CHECK(quality BETWEEN 1 AND 5), -- 1=terrible 5=excelente
+  hours       REAL,                              -- calculado: woke - slept
+  created_at  TEXT    NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS weekly_reviews (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  week        TEXT    NOT NULL UNIQUE,           -- YYYY-WXX
+  wins        TEXT,                              -- texto libre: qué salió bien
+  lessons     TEXT,                              -- qué aprendí / qué ajustar
+  focus_next  TEXT,                              -- prioridad de la semana que viene
+  avg_score   INTEGER,                           -- promedio del total_score de la semana
+  created_at  TEXT    NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_daily_scores_date  ON daily_scores(date);
+CREATE INDEX IF NOT EXISTS idx_sleep_logs_date    ON sleep_logs(date);
+CREATE INDEX IF NOT EXISTS idx_goals_status       ON goals(status);
+
+-- ─────────────────────────────────────────
 -- SEED — categorías por defecto
 -- ─────────────────────────────────────────
 
