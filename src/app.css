@@ -26,6 +26,12 @@
 	box-sizing: border-box;
 }
 
+html {
+	/* Evita el zoom al tocar inputs en iOS */
+	-webkit-text-size-adjust: 100%;
+	text-size-adjust: 100%;
+}
+
 html, body {
 	margin: 0;
 	padding: 0;
@@ -34,11 +40,42 @@ html, body {
 	color: var(--t1);
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
+	/* Sin rebote de scroll — clave para sensación de app nativa */
 	overscroll-behavior: none;
+	/* Evita que el usuario pueda hacer zoom con pinch */
+	touch-action: manipulation;
 }
 
 body {
 	min-height: 100dvh;
+	/* Previene el highlight azul al tocar en iOS/Android */
+	-webkit-tap-highlight-color: transparent;
+	/* Evita la selección accidental de texto al scrollear rápido */
+	-webkit-user-select: none;
+	user-select: none;
+}
+
+/* Re-habilitar selección solo donde tiene sentido */
+input, textarea, [contenteditable] {
+	-webkit-user-select: text;
+	user-select: text;
+}
+
+/* Inputs sin zoom en iOS — iOS hace zoom si font-size < 16px.
+   Forzamos 16px y compensamos con transform scale para que se vea del tamaño correcto */
+@supports (-webkit-touch-callout: none) {
+	input, textarea, select {
+		font-size: 16px !important;
+		transform-origin: left center;
+	}
+}
+
+/* Scrollbars invisibles — parece app, no web */
+::-webkit-scrollbar {
+	display: none;
+}
+* {
+	scrollbar-width: none;
 }
 
 /* ─── Transición de página entre módulos ─── */
