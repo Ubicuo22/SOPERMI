@@ -58,6 +58,7 @@ export function updateProfile(data: Partial<{
 	proteinTarget: number;
 	waterLiters: number;
 	gymDaysWeek: number;
+	enabledModules: string;
 }>) {
 	return db.update(schema.profile).set({ ...data, updatedAt: nowLocal() }).where(eq(schema.profile.id, 1)).run();
 }
@@ -181,43 +182,52 @@ export function getDailyCockpit(date: string) {
 		.limit(5)
 		.all();
 
-	// Build checklist items
-	const checklist = [
-		{
+	// Build checklist items — solo los dominios activos
+	const enabled = new Set(profile.enabledModules.split(',').map(s => s.trim()).filter(Boolean));
+	type ChecklistItem = { id: string; label: string; done: boolean; detail: string | null };
+	const checklist: ChecklistItem[] = [];
+
+	if (enabled.has('sleep')) {
+		checklist.push({
 			id: 'sleep',
 			label: 'registrar sueño',
 			done: sleepDone,
 			detail: sleep ? `${sleep.hours}h (${sleep.sleptAt} → ${sleep.wokeAt})` : null
-		},
-		...allHabits.map(h => ({
-			id: `habit-${h.id}`,
-			label: h.name,
-			done: completedHabitIds.has(h.id),
-			detail: null
-		})),
-		{
+		});
+	}
+	if (enabled.has('habits')) {
+		for (const h of allHabits) {
+			checklist.push({ id: `habit-${h.id}`, label: h.name, done: completedHabitIds.has(h.id), detail: null });
+		}
+	}
+	if (enabled.has('focus')) {
+		checklist.push({
 			id: 'focus',
 			label: `foco (${focusMinutes}/${focusTarget} min)`,
 			done: focusMinutes >= focusTarget,
 			detail: focusMinutes > 0 ? `${Math.round(focusMinutes / 25)} pomodoros` : null
-		},
-		{
+		});
+	}
+	if (enabled.has('gym')) {
+		checklist.push({
 			id: 'gym',
 			label: 'entrenar',
 			done: workoutDone,
 			detail: workout ? `workout activo` : null
-		},
-		{
+		});
+	}
+	if (enabled.has('nutrition')) {
+		checklist.push({
 			id: 'protein',
 			label: `proteína (${protein}/${profile.proteinTarget}g)`,
 			done: protein >= profile.proteinTarget,
 			detail: `${calories} kcal`
-		}
-	];
+		});
+	}
 
 	const totalItems = checklist.length;
 	const doneItems = checklist.filter(c => c.done).length;
-	const completionPct = Math.round((doneItems / totalItems) * 100);
+	const completionPct = totalItems > 0 ? Math.round((doneItems / totalItems) * 100) : 0;
 
 	return {
 		checklist,
@@ -289,14 +299,24 @@ export function calculateDailyScore(date: string) {
 	const protein = nutritionResult?.protein ?? 0;
 	const nutritionScore = profile.proteinTarget > 0 ? Math.min(100, Math.round((protein / profile.proteinTarget) * 100)) : 0;
 
-	// Total ponderado
-	const totalScore = Math.round(
-		sleepScore * 0.20 +
-		habitsScore * 0.25 +
-		focusScore * 0.25 +
-		gymScore * 0.15 +
-		nutritionScore * 0.15
-	);
+	// Total ponderado — solo cuenta los módulos activos, renormalizando los pesos.
+	// Así un día perfecto en lo que SÍ llevas no se hunde por un dominio que no registras.
+	const enabled = new Set(profile.enabledModules.split(',').map(s => s.trim()).filter(Boolean));
+	const baseWeights: Record<string, number> = {
+		sleep: 0.20, habits: 0.25, focus: 0.25, gym: 0.15, nutrition: 0.15
+	};
+	const moduleScores: Record<string, number> = {
+		sleep: sleepScore, habits: habitsScore, focus: focusScore, gym: gymScore, nutrition: nutritionScore
+	};
+	let weightSum = 0;
+	for (const key of enabled) weightSum += baseWeights[key] ?? 0;
+
+	let totalScore = 0;
+	if (weightSum > 0) {
+		let acc = 0;
+		for (const key of enabled) acc += moduleScores[key] * (baseWeights[key] / weightSum);
+		totalScore = Math.round(acc);
+	}
 
 	const xpEarned = xpFromScore(totalScore);
 

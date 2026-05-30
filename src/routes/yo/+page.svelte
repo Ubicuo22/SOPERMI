@@ -43,6 +43,39 @@
 	let configProtein = $state(data.profile.proteinTarget);
 	let configGymDays = $state(data.profile.gymDaysWeek);
 
+	// Módulos activos para el score (opt-in)
+	const allModules = [
+		{ key: 'sleep', label: 'sueño' },
+		{ key: 'habits', label: 'hábitos' },
+		{ key: 'focus', label: 'foco' },
+		{ key: 'gym', label: 'gym' },
+		{ key: 'nutrition', label: 'nutrición' }
+	];
+	let enabledModules = $state(new Set(data.profile.enabledModules.split(',').map(s => s.trim()).filter(Boolean)));
+
+	function toggleModule(key: string) {
+		const next = new Set(enabledModules);
+		if (next.has(key)) next.delete(key);
+		else next.add(key);
+		enabledModules = next;
+	}
+
+	// Breakdown del score: solo módulos guardados como activos, con pesos renormalizados
+	const baseWeights: Record<string, number> = { sleep: 20, habits: 25, focus: 25, gym: 15, nutrition: 15 };
+	const scoreBreakdown = $derived.by(() => {
+		const saved = data.profile.enabledModules.split(',').map(s => s.trim()).filter(Boolean);
+		const sum = saved.reduce((a, k) => a + (baseWeights[k] ?? 0), 0) || 1;
+		const vals: Record<string, number> = {
+			sleep: data.score?.sleepScore ?? 0,
+			habits: data.score?.habitsScore ?? 0,
+			focus: data.score?.focusScore ?? 0,
+			gym: data.score?.gymScore ?? 0,
+			nutrition: data.score?.nutritionScore ?? 0
+		};
+		const labels: Record<string, string> = { sleep: 'sueño', habits: 'hábitos', focus: 'foco', gym: 'gym', nutrition: 'nutrición' };
+		return saved.map(k => ({ label: labels[k], value: vals[k], weight: `${Math.round((baseWeights[k] / sum) * 100)}%` }));
+	});
+
 	async function logSleep() {
 		if (!sleepSleptAt || !sleepWokeAt) return;
 		await fetch('/api/yo?action=sleep', {
@@ -124,9 +157,12 @@
 				name: configName, identity: configIdentity || null,
 				sleepTarget: configSleepTarget, wakeTarget: configWakeTarget,
 				focusHoursTarget: configFocusHours, caloriesTarget: configCalories,
-				proteinTarget: configProtein, gymDaysWeek: configGymDays
+				proteinTarget: configProtein, gymDaysWeek: configGymDays,
+				enabledModules: [...enabledModules].join(',')
 			})
 		});
+		// recalcular el score con los módulos nuevos
+		await fetch(`/api/yo?action=calculate&date=${data.today}`);
 		invalidateAll();
 	}
 
@@ -321,13 +357,7 @@
 	{:else if activeTab === 'score'}
 		<div class="space-y-2">
 			<span class="text-label text-t2 uppercase tracking-[0.08em]">breakdown de hoy</span>
-			{#each [
-				{ label: 'sueño', value: data.score?.sleepScore ?? 0, weight: '20%' },
-				{ label: 'hábitos', value: data.score?.habitsScore ?? 0, weight: '25%' },
-				{ label: 'foco', value: data.score?.focusScore ?? 0, weight: '25%' },
-				{ label: 'gym', value: data.score?.gymScore ?? 0, weight: '15%' },
-				{ label: 'nutrición', value: data.score?.nutritionScore ?? 0, weight: '15%' }
-			] as item}
+			{#each scoreBreakdown as item}
 				<div class="flex items-center gap-2">
 					<span class="text-label text-t2 w-16">{item.label}</span>
 					<div class="flex-1 h-1.5 bg-elevated rounded-full overflow-hidden">
@@ -540,7 +570,20 @@
 				</div>
 			</div>
 
-			<button onclick={saveConfig} class="w-full bg-accent text-bg font-medium text-sub py-3 rounded-lg active:scale-[0.98] transition-transform mt-2">guardar config</button>
+			<span class="text-label text-t2 uppercase tracking-[0.08em] block pt-2">módulos del score</span>
+			<p class="text-micro text-t3 -mt-1">solo los activos cuentan. el score se reparte entre ellos — un día perfecto en lo que llevas no se hunde por lo que no.</p>
+			<div class="flex flex-wrap gap-2">
+				{#each allModules as m}
+					{@const on = enabledModules.has(m.key)}
+					<button
+						onclick={() => toggleModule(m.key)}
+						class="px-3 py-1.5 rounded-control text-meta transition-colors border
+							{on ? 'bg-accent-bg border-accent-dim text-accent' : 'bg-elevated border-border text-t3'}"
+					>{m.label}</button>
+				{/each}
+			</div>
+
+			<button onclick={saveConfig} class="w-full bg-accent text-bg font-medium text-sub py-3 rounded-control active:scale-[0.98] transition-transform mt-2">guardar config</button>
 		</div>
 	{/if}
 </div>

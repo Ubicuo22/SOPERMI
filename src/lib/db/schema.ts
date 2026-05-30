@@ -143,6 +143,7 @@ export const profile = sqliteTable('profile', {
 	proteinTarget: integer('protein_target').notNull().default(150),
 	waterLiters: real('water_liters').notNull().default(2.5),
 	gymDaysWeek: integer('gym_days_week').notNull().default(5),
+	enabledModules: text('enabled_modules').notNull().default('sleep,habits,focus,gym,nutrition'),
 	level: integer('level').notNull().default(1),
 	totalXp: integer('total_xp').notNull().default(0),
 	updatedAt: text('updated_at').notNull().default("(datetime('now'))")

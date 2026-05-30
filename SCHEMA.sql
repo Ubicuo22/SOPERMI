@@ -194,6 +194,9 @@ CREATE TABLE IF NOT EXISTS profile (
   protein_target     INTEGER NOT NULL DEFAULT 150,
   water_liters       REAL    NOT NULL DEFAULT 2.5,
   gym_days_week      INTEGER NOT NULL DEFAULT 5,
+  -- dominios que cuentan para el score diario (opt-in). El score se renormaliza
+  -- entre los activos, así un día perfecto no se hunde por un dominio que no llevas.
+  enabled_modules TEXT NOT NULL DEFAULT 'sleep,habits,focus,gym,nutrition',
   level       INTEGER NOT NULL DEFAULT 1,
   total_xp    INTEGER NOT NULL DEFAULT 0,
   updated_at  TEXT    NOT NULL DEFAULT (datetime('now'))
