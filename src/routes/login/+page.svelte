@@ -35,10 +35,9 @@
 	const digits = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', 'del'];
 </script>
 
-<!-- safe-area top e inset-bottom: funciona con notch y con home indicator -->
 <div
 	class="flex flex-col items-center justify-center bg-bg px-4"
-	style="min-height: 100dvh; padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom);"
+	style="height: 100svh; height: 100dvh; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); box-sizing: border-box;"
 >
 	<h1 class="font-mono text-accent text-metric font-bold mb-1">SOPERMI</h1>
 	<p class="text-t2 text-meta mb-10">ingresa tu PIN</p>

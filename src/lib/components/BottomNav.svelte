@@ -12,7 +12,7 @@
 	];
 </script>
 
-<nav class="bg-surface border-t border-border flex items-stretch justify-around px-1 pb-safe-bottom">
+<nav class="bg-surface border-t border-border flex items-stretch justify-around px-1 pb-safe-bottom flex-shrink-0">
 	{#each tabs as tab}
 		{@const active = $page.url.pathname.startsWith(tab.href)}
 		<a
